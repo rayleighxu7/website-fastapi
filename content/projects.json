@@ -1,0 +1,37 @@
+[
+  {
+    "title": "Website",
+    "description": "This very site you are currently on is a modern, content-driven portfolio built with FastAPI and Python, featuring dynamic theming and content managed via JSON and Markdown config files. Containerised with Docker, deployed on Railway with an ECS Fargate fallback on AWS.",
+    "tags": ["Python", "FastAPI", "Docker", "AWS", "GitHub"],
+    "link": "https://github.com/rayleighxu7/website",
+    "nda": false
+  },
+  {
+    "title": "US Political Data Merge",
+    "description": "Python-based ETL project for merging and deduplicating over 1 million records from multiple Excel/CSV sources using deterministic and fuzzy matching, with company name standardization and US political voter data integration.",
+    "tags": ["Python", "Splink", "Excel"],
+    "link": "https://github.com/rayleighxu7/us-political-data-merge-robv",
+    "nda": false
+  },
+  {
+    "title": "Admin Panel + Billing Configuration Portal",
+    "description": "A flexible, API-first admin panel built with FastAPI and SQLAlchemy ORM. Connects to any database supported by SQLAlchemy \u2014 swap databases by changing a single connection string.",
+    "tags": ["Python", "SQL", "FastAPI", "HTML/CSS"],
+    "link": "https://github.com/rayleighxu7/admin-panel-adaptive",
+    "nda": false
+  },
+  {
+    "title": "Vanguard - Core Metrics Dashboard",
+    "description": "A real-time analytics dashboard powered by Fivetran, BigQuery, and Hex.Tech, refreshing hourly to track key business metrics - including GMV, Revenue, and Customer growth - with both cumulative and time-series views.",
+    "tags": ["Python", "SQL/BigQuery", "Fivetran", "Hex.Tech"],
+    "link": null,
+    "nda": true
+  },
+  {
+    "title": "ABA Custom File Converter",
+    "description": "A custom file converter for ABA files, written in Python. It is used to convert csv files into ABA format. This file format is used universally across Australia for processing bank transactions.",
+    "tags": ["Python", "Streamlit", "Excel"],
+    "link": null,
+    "nda": true
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Data Engineering",
+    "description": "End-to-end data pipeline design, ETL development, and data infrastructure setup using Python, SQL, and cloud platforms.",
+    "icon": "database"
+  },
+  {
+    "title": "Data Migration",
+    "description": "Legacy system data extraction, transformation, and migration with validation and reconciliation processes.",
+    "icon": "transfer"
+  },
+  {
+    "title": "Automation & Tooling",
+    "description": "Custom internal tools, automated reporting systems, and workflow automation to streamline business operations.",
+    "icon": "gear"
+  },
+  {
+    "title": "Consulting & Advisory",
+    "description": "Data strategy consulting, process improvement, and technical advisory for data-driven decision making.",
+    "icon": "lightbulb"
+  }
+]

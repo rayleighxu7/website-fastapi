@@ -1,0 +1,56 @@
+[
+  {
+    "title": "Data Consultant",
+    "company": "freelanxur",
+    "start_date": "November 2025",
+    "end_date": "Present",
+    "description": "Started my own freelancing business as a data engineer & consultant.",
+    "cv_bullets": [
+      "Started my own freelancing business as a data engineer & consultant."
+    ]
+  },
+  {
+    "title": "Data Engineer",
+    "company": "Caruso Software",
+    "start_date": "Aug 2023",
+    "end_date": "Present",
+    "description": "",
+    "cv_bullets": [
+      "Led the migration and onboarding of over $30B in assets onto Caruso's platform.",
+      "Designed and established data team processes to enhance collaboration and efficiency.",
+      "Developed internal tooling and packages to streamline client implementations, ongoing services, and support workflows.",
+      "Built complex applications to address product gaps, including AU/NZ tax filing automation, bulk payment converters, and scheduled reporting systems.",
+      "All tooling and applications maintained and deployed through Terraform in AWS infrastructure.",
+      "Collaborated with software engineers to design an optimized SQL data model supporting efficient GraphQL queries.",
+      "Responsible for transforming and migrating client legacy data.",
+      "Assisted in managing and servicing clients with CRM and Unit Registry data updates post go-live.",
+      "Developed custom scripts to assist clients in reporting and analysis."
+    ]
+  },
+  {
+    "title": "Data Intelligence Analyst",
+    "company": "Spark New Zealand",
+    "start_date": "Nov 2021",
+    "end_date": "Aug 2023",
+    "description": "",
+    "cv_bullets": [
+      "Developed and maintained a data-driven unified marketing platform written in Python.",
+      "Implemented automation of testing and operations using in-house Azure DevOps services.",
+      "Built and enhanced interactive dashboards using Snowflake and PowerBI.",
+      "Conducted analysis on existing campaigns to measure performance and make adjustments.",
+      "Assisted in interviewing, hiring and onboarding interns and graduates."
+    ]
+  },
+  {
+    "title": "Data Analyst Intern",
+    "company": "KPMG New Zealand",
+    "start_date": "Jun 2021",
+    "end_date": "Nov 2021",
+    "description": "",
+    "cv_bullets": [
+      "Worked in a semi-agile team offering remediation services for the Holidays Act Legislation.",
+      "Data wrangling and algorithm building using R.",
+      "Conducted QA and analysis on client datasets using Excel."
+    ]
+  }
+]
