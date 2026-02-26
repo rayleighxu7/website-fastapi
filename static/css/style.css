@@ -1543,6 +1543,11 @@ a {
     align-items: center;
     justify-content: center;
     pointer-events: all;
+    animation: loaderSafetyHide 0s 3s forwards;
+}
+
+@keyframes loaderSafetyHide {
+    to { visibility: hidden; pointer-events: none; z-index: -1; }
 }
 
 .page-loader.hidden {
