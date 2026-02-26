@@ -1,0 +1,13 @@
+{
+  "skills": [
+    { "name": "Python", "percentage": 90 },
+    { "name": "SQL", "percentage": 90 },
+    { "name": "Excel", "percentage": 80 },
+    { "name": "AI", "percentage": 80 },
+    { "name": "Git", "percentage": 80 },
+    { "name": "CI/CD + Cloud", "percentage": 70 },
+    { "name": "Docker", "percentage": 70 },
+    { "name": "and more...", "percentage": 50 }
+  ],
+  "note": "fyi I will never set any skill to 100% - I'm a firm believer that there's always something new to learn."
+}
