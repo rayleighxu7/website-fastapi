@@ -440,7 +440,7 @@ a {
 }
 
 .hero-title {
-    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-size: clamp(1.25rem, 2.5vw, 2rem);
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -1585,9 +1585,23 @@ a {
     animation: loaderFadeIn 0.3s ease forwards;
 }
 
+.loader-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .loader-logo {
     height: 60px;
     width: auto;
+}
+
+.loader-text {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: lowercase;
 }
 
 .loader-line {

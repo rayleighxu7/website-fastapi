@@ -19,12 +19,15 @@
     <!-- Scroll Progress -->
     <div id="scroll-progress" class="scroll-progress"></div>
 
-    <!-- Page Loader -->
-    <div id="page-loader" class="page-loader">
+    <!-- Page Loader (inline styles prevent FOUC before CSS loads) -->
+    <div id="page-loader" class="page-loader" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999;display:flex;align-items:center;justify-content:center;">
         <div class="loader-half loader-left"></div>
         <div class="loader-half loader-right"></div>
-        <div class="loader-content">
-            <img src="/static/images/gold-logo-transparent-bg.PNG" alt="freelanxur" class="loader-logo">
+        <div class="loader-content" style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:16px;">
+            <div class="loader-brand" style="display:flex;align-items:center;gap:12px;">
+                <img src="/static/images/gold-logo-transparent-bg.PNG" alt="freelanxur" class="loader-logo" height="60" style="height:60px;width:auto;">
+                <span class="loader-text">freelanxur</span>
+            </div>
             <div class="loader-line"></div>
         </div>
     </div>
