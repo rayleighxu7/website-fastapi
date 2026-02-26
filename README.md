@@ -1,6 +1,6 @@
 # freelanxur.com
 
-Personal portfolio website rebuilt from Streamlit to FastAPI. A monolithic FastAPI app that serves a single HTML shell populated at runtime via JSON API endpoints.
+Personal portfolio website built with FastAPI. A monolithic FastAPI app that serves a single HTML shell populated at runtime via JSON API endpoints.
 
 ## Quick Start
 
@@ -72,6 +72,22 @@ website-fastapi/
 └── pyproject.toml
 ```
 
+## Page Sections
+
+The single-page site renders these sections in order:
+
+| Section | Description |
+|---|---|
+| Hero | Name, tagline, availability badge, scroll indicator |
+| Metrics | Stats strip (years of experience, projects, etc.) |
+| About | Bio, logo story, and services grid (combined section) |
+| Projects | Project cards with tags, links, NDA handling |
+| Skills | Skill bars with proficiency percentages |
+| Experience | Timeline of work history |
+| Contact | Email, GitHub, LinkedIn cards |
+
+Navigation tabs: About, Projects, Experience, Contact.
+
 ## Content Management
 
 All site content lives in the `content/` directory. Edit JSON files or Markdown files directly — no code changes needed.
@@ -87,6 +103,33 @@ All site content lives in the `content/` directory. Edit JSON files or Markdown 
 | `content/contact.json` | Email, GitHub, LinkedIn links |
 | `content/about_me.md` | "About me" section body (rendered to HTML) |
 | `content/about_freelanxur.md` | "The Logo" section body (rendered to HTML) |
+
+## Frontend
+
+The frontend is vanilla JS and CSS with no build step.
+
+### Design
+
+- Dark/light theme toggle (persisted to localStorage)
+- Gold accent (`#F5C542`) on true black (`#09090B`) / warm white (`#FAFAF7`)
+- Inter font family
+- Glassmorphism cards with `backdrop-filter: blur`
+- Responsive: mobile-first with hamburger nav
+
+### Animations & Effects
+
+- Page loader (split-reveal, once per session via sessionStorage)
+- Hero parallax scroll + gradient glow orb
+- Staggered card entrance animations
+- Cursor-tracking glow on cards (hover devices only)
+- Magnetic button displacement on hover
+- Metric counter overshoot animation (115% then settle)
+- Timeline alternating slide-in (left/right)
+- Scroll progress bar
+- Navbar blur intensification on scroll
+- Back-to-top button (appears after hero)
+- Noise texture overlay
+- `prefers-reduced-motion` fully respected
 
 ## API Endpoints
 

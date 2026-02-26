@@ -35,13 +35,53 @@
     function setupThemeToggle() {
         applyTheme(getTheme());
 
-        const btn = document.getElementById('theme-toggle');
+        var btn = document.getElementById('theme-toggle');
         if (!btn) return;
 
         btn.addEventListener('click', function () {
-            const next = getTheme() === DARK ? LIGHT : DARK;
+            var next = getTheme() === DARK ? LIGHT : DARK;
             applyTheme(next);
         });
+    }
+
+    function runPageLoader(callback) {
+        var loader = document.getElementById('page-loader');
+        if (!loader) { callback(); return; }
+
+        // Skip on repeat visits in same session
+        if (sessionStorage.getItem('loaderShown')) {
+            loader.remove();
+            callback();
+            return;
+        }
+
+        // Skip for reduced motion
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            loader.remove();
+            sessionStorage.setItem('loaderShown', '1');
+            callback();
+            return;
+        }
+
+        sessionStorage.setItem('loaderShown', '1');
+
+        // Logo fades in (0-300ms via CSS)
+        // Line sweeps (300-700ms via CSS)
+        // Split reveal (800-1300ms)
+        setTimeout(function () {
+            loader.classList.add('split');
+            var loaderContent = loader.querySelector('.loader-content');
+            if (loaderContent) {
+                loaderContent.style.opacity = '0';
+                loaderContent.style.transition = 'opacity 0.2s ease';
+            }
+        }, 800);
+
+        setTimeout(function () {
+            loader.classList.add('hidden');
+            loader.remove();
+            callback();
+        }, 1300);
     }
 
     /* ----------------------------------------------------------------------
@@ -83,17 +123,68 @@
             });
         }
 
-        // Navbar background on scroll (add scrolled class)
+        // Navbar + scroll progress + blur intensification
         var navbar = document.getElementById('navbar');
+        var scrollProgress = document.getElementById('scroll-progress');
+        var heroSection = document.querySelector('.hero-section');
+        var heroHeight = heroSection ? heroSection.offsetHeight : 600;
+        if (heroSection) {
+            window.addEventListener('resize', function () {
+                heroHeight = heroSection.offsetHeight;
+            }, { passive: true });
+        }
+
         if (navbar) {
             window.addEventListener('scroll', function () {
-                if (window.scrollY > 100) {
+                var scrollY = window.scrollY;
+
+                // Scrolled class
+                if (scrollY > 100) {
                     navbar.classList.add('scrolled');
                 } else {
                     navbar.classList.remove('scrolled');
                 }
+
+                // Blur intensification (20px -> 40px over hero height)
+                var blurProgress = Math.min(scrollY / heroHeight, 1);
+                var blur = 20 + (blurProgress * 20);
+                navbar.style.setProperty('--navbar-blur', blur + 'px');
+
+                // Scroll progress bar
+                if (scrollProgress) {
+                    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                    var progress = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
+                    scrollProgress.style.width = progress + '%';
+                }
             }, { passive: true });
         }
+    }
+
+    function setupHeroParallax() {
+        var heroContent = document.querySelector('.hero-section .section-content');
+        var heroGlow = document.querySelector('.hero-glow');
+        var heroSection = document.querySelector('.hero-section');
+        if (!heroContent || !heroSection) return;
+
+        // Skip for reduced motion or mobile
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        if (window.innerWidth < 768) return;
+
+        heroContent.classList.add('hero-parallax');
+        if (heroGlow) heroGlow.classList.add('hero-parallax');
+
+        window.addEventListener('scroll', function () {
+            var scrollY = window.scrollY;
+            var heroHeight = heroSection.offsetHeight;
+
+            // Only apply within hero section bounds
+            if (scrollY > heroHeight) return;
+
+            heroContent.style.transform = 'translateY(' + (scrollY * 0.4) + 'px)';
+            if (heroGlow) {
+                heroGlow.style.transform = 'translate(-50%, -50%) translateY(' + (scrollY * 0.7) + 'px)';
+            }
+        }, { passive: true });
     }
 
     function setupNavHighlighting() {
@@ -224,6 +315,14 @@
         var container = document.getElementById('hero-content');
         if (!container) return;
 
+        // Add glow orb behind hero content
+        var heroSection = document.getElementById('hero');
+        if (heroSection && !heroSection.querySelector('.hero-glow')) {
+            var glow = document.createElement('div');
+            glow.className = 'hero-glow';
+            heroSection.querySelector('.section-content').appendChild(glow);
+        }
+
         var statusClass = profile.status_available ? 'available' : 'unavailable';
         var fullName = profile.first_name + ' ' + profile.last_name;
 
@@ -252,6 +351,12 @@
                 typingEl.style.animation = 'typing 1.8s steps(40, end) forwards, blink 0.75s step-end infinite';
             }
         });
+
+        // Apply staggered entrance to hero children
+        var heroChildren = container.children;
+        for (var i = 0; i < heroChildren.length; i++) {
+            heroChildren[i].classList.add('hero-stagger');
+        }
     }
 
     function renderMetrics(metrics) {
@@ -259,10 +364,10 @@
         if (!container) return;
 
         var html = '';
-        metrics.forEach(function (m) {
+        metrics.forEach(function (m, i) {
             var parsed = parseMetricValue(m.value);
             html +=
-                '<div class="metric-card animate-on-scroll">' +
+                '<div class="metric-card glow-card animate-on-scroll" style="animation-delay: ' + (i * 0.08) + 's">' +
                     '<div class="metric-value" data-target="' + parsed.target + '" data-suffix="' + escapeHTML(parsed.suffix) + '">0</div>' +
                     '<div class="metric-label">' + escapeHTML(m.label) + '</div>' +
                 '</div>';
@@ -307,7 +412,7 @@
         var html = '';
         services.forEach(function (s, i) {
             html +=
-                '<div class="service-card animate-on-scroll" style="animation-delay: ' + (i * 0.1) + 's">' +
+                '<div class="service-card glow-card animate-on-scroll" style="animation-delay: ' + (i * 0.1) + 's">' +
                     '<div class="service-icon">' + getServiceIcon(s.icon) + '</div>' +
                     '<h3 class="service-title">' + escapeHTML(s.title) + '</h3>' +
                     '<p class="service-description">' + escapeHTML(s.description) + '</p>' +
@@ -322,7 +427,7 @@
 
         var html = '';
         projects.forEach(function (p, i) {
-            var cardClasses = 'project-card' + (p.nda ? ' nda' : '') + ' animate-on-scroll';
+            var cardClasses = 'project-card glow-card' + (p.nda ? ' nda' : '') + ' animate-on-scroll';
             var clickAttr = (p.link && !p.nda)
                 ? ' onclick="window.open(\'' + escapeHTML(p.link) + '\', \'_blank\')"'
                 : '';
@@ -361,7 +466,7 @@
         experience.forEach(function (e, i) {
             var duration = calculateDuration(e.start_date, e.end_date);
             html +=
-                '<div class="timeline-item animate-on-scroll" style="animation-delay: ' + (i * 0.15) + 's">' +
+                '<div class="timeline-item ' + (i % 2 === 0 ? 'slide-left' : 'slide-right') + '">' +
                     '<div class="timeline-date">' + escapeHTML(e.start_date) + ' - ' + escapeHTML(e.end_date) + '</div>' +
                     '<div class="timeline-duration">' + escapeHTML(duration) + '</div>' +
                     '<div class="timeline-title">' + escapeHTML(e.title) + ' <span class="timeline-company">@ ' + escapeHTML(e.company) + '</span></div>' +
@@ -380,17 +485,17 @@
             : '/static/images/github-logo-light.png';
 
         container.innerHTML =
-            '<a class="contact-card animate-on-scroll" href="mailto:' + escapeHTML(contact.email) + '" style="animation-delay: 0s">' +
+            '<a class="contact-card glow-card animate-on-scroll" href="mailto:' + escapeHTML(contact.email) + '" style="animation-delay: 0s">' +
                 '<div class="contact-icon">\u2709</div>' +
                 '<div class="contact-label">Email</div>' +
                 '<div class="contact-value">' + escapeHTML(contact.email) + '</div>' +
             '</a>' +
-            '<a class="contact-card animate-on-scroll" href="https://' + escapeHTML(contact.github) + '" target="_blank" style="animation-delay: 0.1s">' +
+            '<a class="contact-card glow-card animate-on-scroll" href="https://' + escapeHTML(contact.github) + '" target="_blank" style="animation-delay: 0.1s">' +
                 '<div class="contact-icon"><img src="' + ghImgSrc + '" alt="GitHub" id="github-icon"></div>' +
                 '<div class="contact-label">GitHub</div>' +
                 '<div class="contact-value">' + escapeHTML(contact.github) + '</div>' +
             '</a>' +
-            '<a class="contact-card animate-on-scroll" href="https://' + escapeHTML(contact.linkedin) + '" target="_blank" style="animation-delay: 0.2s">' +
+            '<a class="contact-card glow-card animate-on-scroll" href="https://' + escapeHTML(contact.linkedin) + '" target="_blank" style="animation-delay: 0.2s">' +
                 '<div class="contact-icon"><img src="/static/images/linkedin-logo.png" alt="LinkedIn"></div>' +
                 '<div class="contact-label">LinkedIn</div>' +
                 '<div class="contact-value">' + escapeHTML(contact.linkedin) + '</div>' +
@@ -455,6 +560,115 @@
         }
     }
 
+    function setupTitleAnimations() {
+        var titles = document.querySelectorAll('.section-title');
+        if (!titles.length) return;
+
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('title-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        titles.forEach(function (title) {
+            observer.observe(title);
+        });
+    }
+
+    function setupCardGlow() {
+        // Only on devices with hover capability
+        if (!window.matchMedia('(hover: hover)').matches) return;
+
+        document.addEventListener('mousemove', function (e) {
+            var card = e.target.closest('.glow-card');
+            if (!card) return;
+            var rect = card.getBoundingClientRect();
+            card.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
+            card.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
+        }, { passive: true });
+    }
+
+    function setupTimelineAnimations() {
+        var timeline = document.querySelector('.timeline');
+        if (!timeline) return;
+
+        // Animate the timeline line
+        var timelineObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('timeline-visible');
+                    timelineObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        timelineObserver.observe(timeline);
+
+        // Animate individual timeline items
+        var items = timeline.querySelectorAll('.timeline-item');
+        var itemObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('slide-visible');
+                    itemObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.2 });
+
+        items.forEach(function (item, i) {
+            item.style.transitionDelay = (i * 0.15) + 's';
+            itemObserver.observe(item);
+        });
+    }
+
+    function setupMagneticButtons() {
+        if (!window.matchMedia('(hover: hover)').matches) return;
+
+        var buttons = document.querySelectorAll('.btn');
+        buttons.forEach(function (btn) {
+            btn.classList.add('btn-magnetic');
+
+            btn.addEventListener('mousemove', function (e) {
+                var rect = btn.getBoundingClientRect();
+                var x = e.clientX - rect.left - rect.width / 2;
+                var y = e.clientY - rect.top - rect.height / 2;
+                var maxMove = 4;
+                var moveX = (x / rect.width) * maxMove * 2;
+                var moveY = (y / rect.height) * maxMove * 2;
+                btn.style.transform = 'translate(' + moveX + 'px, ' + moveY + 'px)';
+            });
+
+            btn.addEventListener('mouseleave', function () {
+                btn.style.transform = '';
+            });
+        });
+    }
+
+    function setupBackToTop() {
+        var btn = document.getElementById('back-to-top');
+        var hero = document.querySelector('.hero-section');
+        if (!btn || !hero) return;
+
+        var heroHeight = hero.offsetHeight;
+        window.addEventListener('resize', function () {
+            heroHeight = hero.offsetHeight;
+        }, { passive: true });
+
+        window.addEventListener('scroll', function () {
+            if (window.scrollY > heroHeight) {
+                btn.classList.add('visible');
+            } else {
+                btn.classList.remove('visible');
+            }
+        }, { passive: true });
+
+        btn.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
     /* ----------------------------------------------------------------------
        11. COUNT-UP ANIMATION
        ---------------------------------------------------------------------- */
@@ -463,17 +677,31 @@
         var target = parseInt(element.dataset.target, 10);
         var suffix = element.dataset.suffix || '';
         var duration = 2000;
+        var overshootDuration = duration * 0.7;
+        var settleDuration = duration * 0.3;
+        var overshootTarget = Math.round(target * 1.15);
         var start = performance.now();
 
         function update(now) {
             var elapsed = now - start;
-            var progress = Math.min(elapsed / duration, 1);
-            // easeOutQuart
-            var eased = 1 - Math.pow(1 - progress, 4);
-            var current = Math.round(target * eased);
-            element.textContent = current + suffix;
-            if (progress < 1) {
+
+            if (elapsed < overshootDuration) {
+                // Phase 1: ramp to overshoot (115%)
+                var progress = elapsed / overshootDuration;
+                var eased = 1 - Math.pow(1 - progress, 3);
+                var current = Math.round(overshootTarget * eased);
+                element.textContent = current + suffix;
                 requestAnimationFrame(update);
+            } else if (elapsed < duration) {
+                // Phase 2: settle from overshoot to target
+                var settleProgress = (elapsed - overshootDuration) / settleDuration;
+                var settleEased = settleProgress * settleProgress; // easeIn
+                var current = Math.round(overshootTarget - (overshootTarget - target) * settleEased);
+                element.textContent = current + suffix;
+                requestAnimationFrame(update);
+            } else {
+                // Done — ensure exact target
+                element.textContent = target + suffix;
             }
         }
 
@@ -511,6 +739,7 @@
             var contact    = results[7];
 
             renderHero(profile);
+            setupHeroParallax();
             renderMetrics(metrics);
             renderAbout(about);
             renderSkills(skills);
@@ -520,6 +749,11 @@
             renderContact(contact);
 
             setupScrollAnimations();
+            setupTitleAnimations();
+            setupCardGlow();
+            setupTimelineAnimations();
+            setupMagneticButtons();
+            setupBackToTop();
             setupNavHighlighting();
 
             var footerText = document.getElementById('footer-text');
@@ -531,5 +765,9 @@
         }
     }
 
-    init();
+    // Theme must apply before loader (so loader has correct bg)
+    applyTheme(getTheme());
+    runPageLoader(function () {
+        init();
+    });
 })();
