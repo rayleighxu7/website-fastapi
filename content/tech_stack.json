@@ -1,0 +1,8 @@
+{
+  "categories": [
+    { "name": "Languages", "tags": ["Python", "SQL", "JavaScript", "HTML/CSS"] },
+    { "name": "Data", "tags": ["BigQuery", "Fivetran", "Excel", "Pandas"] },
+    { "name": "Cloud & DevOps", "tags": ["AWS", "Docker", "CI/CD", "GitHub Actions"] },
+    { "name": "Frameworks & Tools", "tags": ["FastAPI", "Streamlit", "Git", "Hex.Tech"] }
+  ]
+}
