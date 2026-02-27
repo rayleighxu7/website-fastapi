@@ -13,6 +13,7 @@ from app.api.experience import router as experience_router
 from app.api.services import router as services_router
 from app.api.contact import router as contact_router
 from app.api.about import router as about_router
+from app.api.tech_stack import router as tech_stack_router
 from app.api.cv import router as cv_router
 from app.api.health import router as health_router
 
@@ -31,6 +32,7 @@ app.include_router(experience_router)
 app.include_router(services_router)
 app.include_router(contact_router)
 app.include_router(about_router)
+app.include_router(tech_stack_router)
 app.include_router(cv_router)
 app.include_router(health_router)
 
