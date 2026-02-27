@@ -241,9 +241,9 @@
         var scrollIndicator = document.querySelector('.scroll-indicator');
         if (scrollIndicator) {
             scrollIndicator.addEventListener('click', function () {
-                var metricsSection = document.getElementById('metrics');
-                if (metricsSection) {
-                    metricsSection.scrollIntoView({ behavior: 'smooth' });
+                var servicesSection = document.getElementById('metrics');
+                if (servicesSection) {
+                    servicesSection.scrollIntoView({ behavior: 'smooth' });
                 }
             });
         }
@@ -322,8 +322,9 @@
         var sectionToNav = {
             hero: null,
             metrics: null,
-            about: '#about',
+            services: '#services',
             projects: '#projects',
+            about: '#about',
             experience: '#experience',
             skills: '#experience',
             contact: '#contact'
@@ -486,10 +487,10 @@
         requestAnimationFrame(function () {
             var typingEl = container.querySelector('.typing-text');
             if (typingEl) {
-                // Measure the natural text width before constraining
                 typingEl.style.display = 'inline-block';
                 typingEl.style.whiteSpace = 'nowrap';
-                var naturalWidth = typingEl.scrollWidth;
+                var naturalWidth = Math.ceil(typingEl.getBoundingClientRect().width) + 1;
+                typingEl.style.boxSizing = 'content-box';
                 typingEl.style.setProperty('--typing-width', naturalWidth + 'px');
                 typingEl.style.overflow = 'hidden';
                 typingEl.style.borderRight = '3px solid var(--accent)';
@@ -505,6 +506,7 @@
                 heroChildren[i].classList.add('hero-stagger');
             }
         }
+
     }
 
     function renderMetrics(metrics) {
@@ -528,8 +530,20 @@
         if (!container) return;
 
         container.innerHTML =
-            '<div class="about-text-col"><h3 class="about-col-title">About Me</h3><div class="about-text">' + about.about_me + '</div></div>' +
-            '<div class="about-logo-col"><h3 class="about-col-title">The Logo</h3><div class="about-text">' + about.about_logo + '</div></div>';
+            '<div class="about-photo-col">' +
+                '<img src="/static/images/profile-photo.png" alt="Rayleigh Xu" class="about-photo">' +
+            '</div>' +
+            '<div class="about-text-col">' +
+                '<h3 class="about-subtitle">Me</h3>' +
+                '<div class="about-text">' + about.about_me + '</div>' +
+                '<div class="about-logo-section">' +
+                    '<div class="about-logo-header">' +
+                        '<h3 class="about-logo-title">The Logo</h3>' +
+                        '<img src="/static/images/gold-logo-transparent-bg.PNG" alt="freelanxur logo" class="about-logo-icon">' +
+                    '</div>' +
+                    '<div class="about-text">' + about.about_logo + '</div>' +
+                '</div>' +
+            '</div>';
     }
 
     function renderSkills(skills) {
@@ -542,7 +556,6 @@
                 '<div class="skill-item">' +
                     '<div class="skill-header">' +
                         '<span class="skill-name">' + escapeHTML(s.name) + '</span>' +
-                        '<span class="skill-percentage">' + s.percentage + '%</span>' +
                     '</div>' +
                     '<div class="skill-bar">' +
                         '<div class="skill-fill" style="--skill-width: ' + s.percentage + '%" data-width="' + s.percentage + '"></div>' +
@@ -603,6 +616,14 @@
                     bottomHtml +
                 '</div>';
         });
+        // "More on GitHub" card
+        html +=
+            '<a class="project-card project-card-github animate-on-scroll" href="https://github.com/rayleighxu7" target="_blank" rel="noopener" style="animation-delay: ' + (projects.length * 0.1) + 's">' +
+                '<div class="github-card-inner">' +
+                    '<svg class="github-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>' +
+                    '<span class="github-card-text">More on GitHub</span>' +
+                '</div>' +
+            '</a>';
         container.innerHTML = html;
     }
 
@@ -647,6 +668,11 @@
                 '<div class="contact-icon"><img src="/static/images/linkedin-logo.png" alt="LinkedIn"></div>' +
                 '<div class="contact-label">LinkedIn</div>' +
                 '<div class="contact-value">' + escapeHTML(contact.linkedin) + '</div>' +
+            '</a>' +
+            '<a class="contact-card glow-card animate-on-scroll" href="/api/download-cv" download style="animation-delay: 0.3s">' +
+                '<div class="contact-icon">\uD83D\uDCC4</div>' +
+                '<div class="contact-label">Download CV</div>' +
+                '<div class="contact-value">One-page PDF</div>' +
             '</a>';
     }
 
@@ -880,11 +906,11 @@
             renderHero(profile);
             setupHeroParallax();
             renderMetrics(metrics);
-            renderAbout(about);
-            renderSkills(skills);
             renderServices(services);
             renderProjects(projects);
+            renderAbout(about);
             renderExperience(experience);
+            renderSkills(skills);
             renderContact(contact);
 
             setupScrollAnimations();
