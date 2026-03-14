@@ -22,8 +22,13 @@
         document.documentElement.dataset.theme = theme;
         localStorage.setItem(THEME_KEY, theme);
 
-        // Update Psyduck image filter (handled by CSS variable --psyduck-filter)
-        // Update GitHub icon if it has been rendered
+        // Keep top-right Psyduck toggle state in sync.
+        const topToggle = document.getElementById('theme-toggle');
+        if (topToggle) {
+            topToggle.setAttribute('aria-pressed', String(theme === DARK));
+        }
+
+        // Update GitHub icon in contact card when present.
         const ghIcon = document.getElementById('github-icon');
         if (ghIcon) {
             ghIcon.src = theme === DARK

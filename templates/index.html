@@ -44,8 +44,11 @@
                 <a href="#contact" class="nav-link">Contact</a>
             </div>
 
-            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
-                <img src="/static/images/2842-stressedpsyduck.png" alt="Toggle theme" class="theme-toggle-img">
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" aria-pressed="true">
+                <span class="theme-toggle-stack" aria-hidden="true">
+                    <img src="/static/images/2842-stressedpsyduck.png" alt="" class="theme-psyduck theme-psyduck-dark">
+                    <img src="/static/images/2842-stressedpsyduck.png" alt="" class="theme-psyduck theme-psyduck-light">
+                </span>
             </button>
 
             <button id="hamburger" class="hamburger" aria-label="Open menu" aria-expanded="false">

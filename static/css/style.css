@@ -290,15 +290,53 @@ a {
     background: var(--surface-hover);
 }
 
-.theme-toggle-img {
+.theme-toggle-stack {
+    position: relative;
     width: 28px;
     height: 28px;
-    filter: var(--psyduck-filter);
-    transition: filter 0.3s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.theme-toggle:hover .theme-toggle-img {
-    transform: scale(1.1);
+.theme-psyduck {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    transition: opacity 0.45s ease, transform 0.55s cubic-bezier(0.34, 1.2, 0.64, 1);
+    will-change: opacity, transform;
+}
+
+.theme-psyduck-dark {
+    filter: grayscale(0);
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+.theme-psyduck-light {
+    filter: grayscale(1) contrast(1.2);
+    opacity: 0;
+    transform: rotate(-70deg) scale(0.6);
+}
+
+[data-theme="light"] .theme-psyduck-dark {
+    opacity: 0;
+    transform: rotate(70deg) scale(0.6);
+}
+
+[data-theme="light"] .theme-psyduck-light {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+}
+
+.theme-toggle:hover .theme-toggle-stack {
+    transform: scale(1.08);
+    transition: transform 0.2s ease;
+}
+
+.theme-toggle:active .theme-toggle-stack {
+    transform: scale(0.92);
 }
 
 
