@@ -320,8 +320,47 @@
     function setupNavHighlighting() {
         var sections = document.querySelectorAll('.section[id]');
         var navLinks = document.querySelectorAll('.nav-link');
+        var navLinksWrap = document.querySelector('.nav-links');
 
-        if (!sections.length || !navLinks.length) return;
+        if (!sections.length || !navLinks.length || !navLinksWrap) return;
+
+        var indicator = navLinksWrap.querySelector('.nav-links-indicator');
+        if (!indicator) {
+            indicator = document.createElement('span');
+            indicator.className = 'nav-links-indicator';
+            navLinksWrap.appendChild(indicator);
+        }
+
+        var activeLink = null;
+        var contactHref = '#contact';
+
+        function moveIndicator(link) {
+            if (!link) return;
+            var wrapRect = navLinksWrap.getBoundingClientRect();
+            var linkRect = link.getBoundingClientRect();
+            indicator.style.width = linkRect.width + 'px';
+            indicator.style.transform = 'translateX(' + (linkRect.left - wrapRect.left) + 'px)';
+            indicator.classList.add('visible');
+        }
+
+        function setActiveLinkByHref(targetHref) {
+            var nextActive = null;
+            navLinks.forEach(function (link) {
+                var href = link.getAttribute('href');
+                var isActive = targetHref && href === targetHref;
+                link.classList.toggle('active', !!isActive);
+                if (isActive) {
+                    nextActive = link;
+                }
+            });
+
+            activeLink = nextActive;
+            if (activeLink) {
+                moveIndicator(activeLink);
+            } else {
+                indicator.classList.remove('visible');
+            }
+        }
 
         // Map section IDs to the nav link href that should be highlighted
         var sectionToNav = {
@@ -339,14 +378,7 @@
             entries.forEach(function (entry) {
                 if (entry.isIntersecting) {
                     var targetHref = sectionToNav[entry.target.id];
-                    navLinks.forEach(function (link) {
-                        var href = link.getAttribute('href');
-                        if (targetHref && href === targetHref) {
-                            link.classList.add('active');
-                        } else {
-                            link.classList.remove('active');
-                        }
-                    });
+                    setActiveLinkByHref(targetHref);
                 }
             });
         }, {
@@ -357,6 +389,42 @@
         sections.forEach(function (section) {
             observer.observe(section);
         });
+
+        // Fallback for the final section: near document bottom, force Contact active.
+        function syncBottomSectionHighlight() {
+            if (window.scrollY <= 8) {
+                setActiveLinkByHref(null);
+                return;
+            }
+
+            var scrollBottom = window.scrollY + window.innerHeight;
+            var docBottom = document.documentElement.scrollHeight;
+            if (docBottom - scrollBottom <= 2) {
+                setActiveLinkByHref(contactHref);
+            }
+        }
+
+        window.addEventListener('scroll', syncBottomSectionHighlight, { passive: true });
+        window.addEventListener('resize', syncBottomSectionHighlight, { passive: true });
+        syncBottomSectionHighlight();
+
+        navLinks.forEach(function (link) {
+            link.addEventListener('mouseenter', function () {
+                moveIndicator(link);
+            });
+        });
+
+        navLinksWrap.addEventListener('mouseleave', function () {
+            if (activeLink) {
+                moveIndicator(activeLink);
+            }
+        });
+
+        window.addEventListener('resize', function () {
+            if (activeLink) {
+                moveIndicator(activeLink);
+            }
+        }, { passive: true });
     }
 
     /* ----------------------------------------------------------------------
