@@ -21,6 +21,13 @@
     "nda": false
   },
   {
+    "title": "dbt Analytics Pipeline",
+    "description": "A dbt transformation project on BigQuery, deployed through Fivetran Transformations. It unpacks JSON-native source tables into typed staging models, applies business logic in intermediate models, and publishes analytics-ready marts with data quality tests.",
+    "tags": ["dbt", "BigQuery", "SQL", "Fivetran", "Data Modeling"],
+    "link": null,
+    "nda": true
+  },
+  {
     "title": "Vanguard - Core Metrics Dashboard",
     "description": "A real-time analytics dashboard powered by Fivetran, BigQuery, and Hex.Tech, refreshing hourly to track key business metrics - including GMV, Revenue, and Customer growth - with both cumulative and time-series views.",
     "tags": ["Python", "SQL/BigQuery", "Fivetran", "Hex.Tech"],

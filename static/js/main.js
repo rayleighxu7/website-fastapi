@@ -703,7 +703,7 @@
 
                     // If this is a metric card, fire count-up
                     var metricValue = entry.target.querySelector('.metric-value[data-target]');
-                    if (metricValue) {
+                    if (metricValue && entry.target.classList.contains('metric-card')) {
                         animateCountUp(metricValue);
                     }
                 }
@@ -848,29 +848,23 @@
        ---------------------------------------------------------------------- */
 
     function animateCountUp(element) {
+        if (element.dataset.animated === '1') {
+            return;
+        }
+        element.dataset.animated = '1';
+
         var target = parseInt(element.dataset.target, 10);
         var suffix = element.dataset.suffix || '';
         var duration = 2000;
-        var overshootDuration = duration * 0.7;
-        var settleDuration = duration * 0.3;
-        var overshootTarget = Math.round(target * 1.15);
         var start = performance.now();
 
         function update(now) {
-            var elapsed = now - start;
+            var elapsed = Math.max(0, now - start);
 
-            if (elapsed < overshootDuration) {
-                // Phase 1: ramp to overshoot (115%)
-                var progress = elapsed / overshootDuration;
+            if (elapsed < duration) {
+                var progress = Math.min(1, elapsed / duration);
                 var eased = 1 - Math.pow(1 - progress, 3);
-                var current = Math.round(overshootTarget * eased);
-                element.textContent = current + suffix;
-                requestAnimationFrame(update);
-            } else if (elapsed < duration) {
-                // Phase 2: settle from overshoot to target
-                var settleProgress = (elapsed - overshootDuration) / settleDuration;
-                var settleEased = settleProgress * settleProgress; // easeIn
-                var current = Math.round(overshootTarget - (overshootTarget - target) * settleEased);
+                var current = Math.min(target, Math.round(target * eased));
                 element.textContent = current + suffix;
                 requestAnimationFrame(update);
             } else {
