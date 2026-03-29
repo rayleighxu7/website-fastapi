@@ -44,7 +44,7 @@ website-fastapi/
 │   │   ├── cv.py                  # GET /api/download-cv
 │   │   └── health.py              # GET /api/health
 │   └── pages/
-│       └── router.py              # GET / — serves HTML shell
+│       └── router.py              # GET / - serves HTML shell
 ├── content/
 │   ├── profile.json
 │   ├── metrics.json
@@ -90,7 +90,7 @@ Navigation tabs: About, Projects, Experience, Contact.
 
 ## Content Management
 
-All site content lives in the `content/` directory. Edit JSON files or Markdown files directly — no code changes needed.
+All site content lives in the `content/` directory. Edit JSON files or Markdown files directly - no code changes needed.
 
 | File | What it controls |
 |---|---|

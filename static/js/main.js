@@ -941,7 +941,7 @@
                 element.textContent = current + suffix;
                 requestAnimationFrame(update);
             } else {
-                // Done — ensure exact target
+                // Done - ensure exact target
                 element.textContent = target + suffix;
             }
         }

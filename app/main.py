@@ -34,5 +34,5 @@ app.include_router(about_router)
 app.include_router(cv_router)
 app.include_router(health_router)
 
-# Page router (must be last — catches /)
+# Page router (must be last - catches /)
 app.include_router(pages_router)
