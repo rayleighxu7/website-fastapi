@@ -105,16 +105,11 @@ class CVPDF(FPDF):
     # ── Drawing helpers ──────────────────────────────────────────────────────
 
     def section_heading(self, title: str):
-        """Compact gold section heading with thin rule."""
+        """Compact section heading with thin rule."""
         self.ln(3)
         y = self.get_y()
 
-        # Small gold dot
-        self.set_fill_color(*_HEADING)
-        self.ellipse(self.l_margin, y + 1.2, 1.8, 1.8, style="F")
-
-        # Title text
-        self.set_xy(self.l_margin + 3.5, y)
+        self.set_xy(self.l_margin, y)
         self.set_font("Helvetica", "B", 9)
         self.set_text_color(*_DARK)
         self.cell(0, 4.5, title.upper(), new_x="LMARGIN", new_y="NEXT")
@@ -232,44 +227,63 @@ def build_cv_pdf(
     pdf.set_x(_LM)
     pdf.multi_cell(_CW, 3.5, _s(about), new_x="LMARGIN", new_y="NEXT")
 
-    # ── Experience ───────────────────────────────────────────────────────────
+    # ── Experience (timeline: rail + gold dots, text to the right) ───────────
     pdf.section_heading("Experience")
 
-    inner_x = _LM + 5
-    bullet_x = inner_x + 1
-    bullet_w = _CW - 8
+    rail_x = _LM + 4.5
+    text_x = _LM + 11
+    bullet_x = text_x + 1
+    bullet_w = _PW - _RM - bullet_x
+    title_h = 4.5
+    gap_after = 1.5
 
+    blocks: list[dict] = []
+    y_cursor = pdf.get_y()
     for exp in experience:
         bullets = exp.get("cv_bullets", [])
         title_text = _s(f"{exp['title']} @ {exp['company']}")
         date_text = _s(f"{exp['start_date']} - {exp['end_date']}")
 
-        # Pre-calculate card height
-        title_h = 4.5
-        bullet_total = 0
         pdf.set_font("Helvetica", "", 7.5)
+        bh = 1 + title_h + 1
         for bullet in bullets:
             lines = len(pdf.multi_cell(
                 bullet_w, 3.3, _s(f"- {bullet}"),
                 dry_run=True, output="LINES",
             ))
-            bullet_total += lines * 3.3
-
-        card_h = 2 + title_h  # top padding + title
+            bh += lines * 3.3
         if bullets:
-            card_h += bullet_total + 0.5
-        card_h += 1  # bottom padding
+            bh += 0.5
 
-        card_y = pdf.get_y()
-        pdf._card_rect(_LM, card_y, _CW, card_h)
+        blocks.append({
+            "y": y_cursor,
+            "h": bh,
+            "title_text": title_text,
+            "date_text": date_text,
+            "bullets": bullets,
+        })
+        y_cursor += bh + gap_after
 
-        # Gold left accent strip
-        pdf.set_fill_color(*_HEADING)
-        pdf.rect(_LM, card_y, 1, card_h, style="F",
-                 round_corners=True, corner_radius=0.5)
+    if blocks:
+        line_y0 = blocks[0]["y"] + 1.2
+        line_y1 = blocks[-1]["y"] + blocks[-1]["h"] - 1.2
+        pdf.set_draw_color(*_RULE_SOFT)
+        pdf.set_line_width(0.25)
+        pdf.line(rail_x, line_y0, rail_x, line_y1)
 
-        # Title + date row
-        pdf.set_xy(inner_x, card_y + 1)
+        for b in blocks:
+            dot_cy = b["y"] + 1 + title_h / 2
+            pdf.set_fill_color(*_HEADING)
+            pdf.ellipse(rail_x - 0.9, dot_cy - 0.9, 1.8, 1.8, style="F")
+
+    for b in blocks:
+        y0 = b["y"]
+        row_y = y0 + 1
+        title_text = b["title_text"]
+        date_text = b["date_text"]
+        bullets = b["bullets"]
+
+        pdf.set_xy(text_x, row_y)
         pdf.set_font("Helvetica", "B", 8.5)
         pdf.set_text_color(*_DARK)
         pdf.cell(pdf.get_string_width(title_text) + 1, title_h, title_text)
@@ -278,12 +292,13 @@ def build_cv_pdf(
             pdf.set_font("Helvetica", "", 7.5)
             pdf.set_text_color(*_MUTED)
             date_w = pdf.get_string_width(date_text)
-            pdf.set_xy(_LM + _CW - 5 - date_w, card_y + 1)
+            pdf.set_xy(_LM + _CW - date_w, row_y)
             pdf.cell(date_w, title_h, date_text)
+            pdf.set_text_color(*_DARK)
 
-        # Bullet points
+        pdf.set_y(row_y + title_h)
+
         if bullets:
-            pdf.set_xy(bullet_x, card_y + 1 + title_h)
             pdf.set_font("Helvetica", "", 7.5)
             pdf.set_text_color(*_BODY)
             for bullet in bullets:
@@ -293,7 +308,8 @@ def build_cv_pdf(
                     new_x="LMARGIN", new_y="NEXT",
                 )
 
-        pdf.set_y(card_y + card_h + 1.5)
+    if blocks:
+        pdf.set_y(blocks[-1]["y"] + blocks[-1]["h"] + 1.5)
 
     # ── Skills (two-column layout) ───────────────────────────────────────────
     pdf.section_heading("Skills")
@@ -374,9 +390,10 @@ def build_cv_pdf(
         # Calculate card height
         pdf.set_font("Helvetica", "", 7.5)
         body_lines = 0
+        proj_text_w = _CW - 8
         if desc:
             body_lines = len(pdf.multi_cell(
-                _CW - 12, 3.3, desc, dry_run=True, output="LINES",
+                proj_text_w, 3.3, desc, dry_run=True, output="LINES",
             ))
 
         card_h = 3  # top/bottom padding
@@ -389,12 +406,7 @@ def build_cv_pdf(
         card_y = pdf.get_y()
         pdf._card_rect(_LM, card_y, _CW, card_h)
 
-        # Gold left accent strip
-        pdf.set_fill_color(*_HEADING)
-        pdf.rect(_LM, card_y, 1, card_h, style="F",
-                 round_corners=True, corner_radius=0.5)
-
-        inner_x = _LM + 5
+        inner_x = _LM + 4
         pdf.set_xy(inner_x, card_y + 1)
 
         # Title
@@ -419,7 +431,7 @@ def build_cv_pdf(
             pdf.set_x(inner_x)
             pdf.set_font("Helvetica", "", 7.5)
             pdf.set_text_color(*_BODY)
-            pdf.multi_cell(_CW - 12, 3.3, desc, new_x="LMARGIN", new_y="NEXT")
+            pdf.multi_cell(proj_text_w, 3.3, desc, new_x="LMARGIN", new_y="NEXT")
 
         pdf.set_y(card_y + card_h + 1.5)
 
@@ -431,7 +443,7 @@ def build_cv_pdf(
     see_more_y = pdf.get_y()
     pdf._card_rect(_LM, see_more_y, _CW, see_more_h)
 
-    pdf.set_xy(_LM + 5, see_more_y + 2)
+    pdf.set_xy(_LM + 4, see_more_y + 2)
     pdf.set_font("Helvetica", "I", 7.5)
     pdf.set_text_color(*_MUTED)
     pdf.cell(w=pdf.get_string_width("For more projects, see my "), h=4, txt="For more projects, see my ")
