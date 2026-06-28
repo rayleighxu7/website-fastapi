@@ -292,7 +292,6 @@
 
     function setupHeroParallax() {
         var heroContent = document.querySelector('.hero-section .section-content');
-        var heroGlow = document.querySelector('.hero-glow');
         var heroSection = document.querySelector('.hero-section');
         if (!heroContent || !heroSection) return;
 
@@ -301,7 +300,6 @@
         if (window.innerWidth < 768) return;
 
         heroContent.classList.add('hero-parallax');
-        if (heroGlow) heroGlow.classList.add('hero-parallax');
 
         window.addEventListener('scroll', function () {
             var scrollY = window.scrollY;
@@ -311,9 +309,6 @@
             if (scrollY > heroHeight) return;
 
             heroContent.style.transform = 'translateY(' + (scrollY * 0.4) + 'px)';
-            if (heroGlow) {
-                heroGlow.style.transform = 'translate(-50%, -50%) translateY(' + (scrollY * 0.7) + 'px)';
-            }
         }, { passive: true });
     }
 
@@ -524,14 +519,6 @@
     function renderHero(profile) {
         var container = document.getElementById('hero-content');
         if (!container) return;
-
-        // Add glow orb behind hero content
-        var heroSection = document.getElementById('hero');
-        if (heroSection && !heroSection.querySelector('.hero-glow')) {
-            var glow = document.createElement('div');
-            glow.className = 'hero-glow';
-            heroSection.querySelector('.section-content').appendChild(glow);
-        }
 
         var statusClass = profile.status_available ? 'available' : 'unavailable';
         var fullName = profile.first_name + ' ' + profile.last_name;

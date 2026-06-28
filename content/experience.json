@@ -20,6 +20,7 @@
       "Designed and established data team processes to enhance collaboration and efficiency.",
       "Developed internal tooling and packages to streamline client implementations, ongoing services, and support workflows.",
       "Built complex applications to address product gaps, including AU/NZ tax filing automation, bulk payment converters, and scheduled reporting systems.",
+      "Built an integration producing XML files for Xplan.",
       "All tooling and applications maintained and deployed through Terraform in AWS infrastructure.",
       "Collaborated with software engineers to design an optimized SQL data model supporting efficient GraphQL queries.",
       "Responsible for transforming and migrating client legacy data.",
