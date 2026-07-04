@@ -1,0 +1,2 @@
+You're probably here because you need something done, and I reckon I can be that guy. I've got a wide range of experience in the data field, and even when something's completely new to me, I pick it up fast and I'm always up for a challenge. So hit me up and let's build something great together.
+Or maybe you're just having a browse, that works too. Either way, I'm always open to a chat, so feel free to reach out.

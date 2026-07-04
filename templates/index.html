@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="/static/css/style.css?v={{ v }}">
 </head>
 <body>
+    <script id="sections-config" type="application/json">{{ sections_config | tojson }}</script>
+
     <!-- Scroll Progress -->
     <div id="scroll-progress" class="scroll-progress"></div>
 
@@ -36,12 +38,14 @@
                 <img src="/static/images/gold-logo-transparent-bg.PNG" alt="freelanxur logo" class="nav-logo">
             </a>
 
+{% from "partials/sections.html" import render_section %}
+
             <div class="nav-links">
-                <a href="#services" class="nav-link">Services</a>
-                <a href="#projects" class="nav-link">Projects</a>
-                <a href="#about" class="nav-link">About</a>
-                <a href="#experience" class="nav-link">Experience</a>
-                <a href="#contact" class="nav-link">Contact</a>
+                {% for section in sections_config %}
+                {% if section.enabled and section.nav_label %}
+                <a href="{{ section.nav_href }}" class="nav-link">{{ section.nav_label }}</a>
+                {% endif %}
+                {% endfor %}
             </div>
 
             <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" aria-pressed="true">
@@ -61,86 +65,24 @@
 
     <!-- Mobile Menu Overlay -->
     <div id="mobile-menu" class="mobile-menu">
-        <a href="#services" class="mobile-link">Services</a>
-        <a href="#projects" class="mobile-link">Projects</a>
-        <a href="#about" class="mobile-link">About</a>
-        <a href="#experience" class="mobile-link">Experience</a>
-        <a href="#contact" class="mobile-link">Contact</a>
+        {% for section in sections_config %}
+        {% if section.enabled and section.nav_label %}
+        <a href="{{ section.nav_href }}" class="mobile-link">{{ section.nav_label }}</a>
+        {% endif %}
+        {% endfor %}
     </div>
 
-    <!-- Hero Section -->
-    <section id="hero" class="section hero-section">
-        <div class="section-content">
-            <div id="hero-content"></div>
-        </div>
-        <div class="scroll-indicator">
-            <span class="chevron"></span>
-        </div>
-    </section>
-
-    <!-- Metrics Section -->
-    <section id="metrics" class="section animate-on-scroll">
-        <div class="section-content">
-            <div id="metrics-content" class="metrics-grid"></div>
-        </div>
-    </section>
-
-    <!-- Services Section -->
-    <section id="services" class="section animate-on-scroll">
-        <div class="section-content">
-            <h2 class="section-title">Services</h2>
-            <p class="section-subtitle">What I can do for you</p>
-            <div id="services-content" class="services-grid"></div>
-        </div>
-    </section>
-
-    <!-- Projects Section -->
-    <section id="projects" class="section animate-on-scroll">
-        <div class="section-content">
-            <h2 class="section-title">Projects</h2>
-            <p class="section-subtitle">A selection of things I have worked on</p>
-            <div id="projects-content" class="projects-grid"></div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="section animate-on-scroll">
-        <div class="section-content">
-            <h2 class="section-title">About</h2>
-            <div id="about-content" class="about-grid"></div>
-        </div>
-    </section>
-
-    <!-- Experience Section -->
-    <section id="experience" class="section animate-on-scroll">
-        <div class="section-content">
-            <h2 class="section-title">Experience</h2>
-            <div id="experience-content" class="timeline"></div>
-        </div>
-    </section>
-
-    <!-- Skills Section -->
-    <section id="skills" class="section animate-on-scroll">
-        <div class="section-content">
-            <h3 class="section-subheader">Skills</h3>
-            <div id="skills-content"></div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="section animate-on-scroll">
-        <div class="section-content">
-            <h2 class="section-title">Get In Touch</h2>
-            <p class="section-subtitle">I'd love to hear from you</p>
-            <div id="contact-content" class="contact-grid"></div>
-        </div>
-    </section>
+    {% for section in sections_config %}
+    {% if section.enabled %}
+    {{ render_section(section.key) }}
+    {% endif %}
+    {% endfor %}
 
     <!-- Footer -->
     <footer class="footer">
         <img src="/static/images/gold-logo-transparent-bg.PNG" alt="" class="footer-watermark" aria-hidden="true">
         <div class="footer-content">
-            <span id="footer-text"></span>
+            <span id="footer-text">{{ footer }}</span>
         </div>
     </footer>
 

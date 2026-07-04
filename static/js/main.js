@@ -6,6 +6,58 @@
 (function () {
     'use strict';
 
+    var DEFAULT_SECTION_CONFIG = [
+        { key: 'hero', enabled: true },
+        { key: 'metrics', enabled: true },
+        { key: 'services', enabled: true },
+        { key: 'projects', enabled: true },
+        { key: 'about', enabled: true },
+        { key: 'experience', enabled: true },
+        { key: 'skills', enabled: true },
+        { key: 'contact', enabled: true }
+    ];
+
+    function getSectionConfig() {
+        var el = document.getElementById('sections-config');
+        if (!el) {
+            return DEFAULT_SECTION_CONFIG;
+        }
+        return JSON.parse(el.textContent);
+    }
+
+    function getSectionFlags(sectionConfig) {
+        sectionConfig = sectionConfig || getSectionConfig();
+        var flags = {};
+        sectionConfig.forEach(function (section) {
+            flags[section.key] = section.enabled;
+        });
+        return flags;
+    }
+
+    function getFirstSectionAfterHero(sectionConfig) {
+        sectionConfig = sectionConfig || getSectionConfig();
+        for (var i = 0; i < sectionConfig.length; i++) {
+            var section = sectionConfig[i];
+            if (section.key !== 'hero' && section.enabled) {
+                return section.key;
+            }
+        }
+        return null;
+    }
+
+    function fetchSectionData(sectionFlags) {
+        return Promise.all([
+            fetchJSON('/api/profile'),
+            sectionFlags.metrics ? fetchJSON('/api/metrics') : Promise.resolve(null),
+            sectionFlags.about ? fetchJSON('/api/about') : Promise.resolve(null),
+            sectionFlags.skills ? fetchJSON('/api/skills') : Promise.resolve(null),
+            sectionFlags.services ? fetchJSON('/api/services') : Promise.resolve(null),
+            sectionFlags.projects ? fetchJSON('/api/projects') : Promise.resolve(null),
+            sectionFlags.experience ? fetchJSON('/api/experience') : Promise.resolve(null),
+            sectionFlags.contact ? fetchJSON('/api/contact') : Promise.resolve(null)
+        ]);
+    }
+
     /* ----------------------------------------------------------------------
        1. THEME
        ---------------------------------------------------------------------- */
@@ -115,6 +167,15 @@
 
         // Fade out loader, animate brand into hero position
         setTimeout(function () {
+            if (!getSectionFlags().hero) {
+                callback();
+                loader.classList.add('fade-out');
+                setTimeout(function () {
+                    loader.remove();
+                }, 600);
+                return;
+            }
+
             // Snapshot brand position
             var brandRect = loaderBrand.getBoundingClientRect();
 
@@ -246,9 +307,13 @@
         var scrollIndicator = document.querySelector('.scroll-indicator');
         if (scrollIndicator) {
             scrollIndicator.addEventListener('click', function () {
-                var servicesSection = document.getElementById('metrics');
-                if (servicesSection) {
-                    servicesSection.scrollIntoView({ behavior: 'smooth' });
+                var sectionConfig = getSectionConfig();
+                var sectionFlags = getSectionFlags(sectionConfig);
+                var targetId = getFirstSectionAfterHero(sectionConfig);
+                if (!targetId) return;
+                var targetSection = document.getElementById(targetId);
+                if (targetSection) {
+                    targetSection.scrollIntoView({ behavior: 'smooth' });
                 }
             });
         }
@@ -326,8 +391,10 @@
             navLinksWrap.appendChild(indicator);
         }
 
+        var sectionConfig = getSectionConfig();
+        var sectionFlags = getSectionFlags(sectionConfig);
         var activeLink = null;
-        var contactHref = '#contact';
+        var contactHref = sectionFlags.contact ? '#contact' : null;
 
         function moveIndicator(link) {
             if (!link) return;
@@ -361,12 +428,12 @@
         var sectionToNav = {
             hero: null,
             metrics: null,
-            services: '#services',
-            projects: '#projects',
-            about: '#about',
-            experience: '#experience',
-            skills: '#experience',
-            contact: '#contact'
+            services: sectionFlags.services ? '#services' : null,
+            projects: sectionFlags.projects ? '#projects' : null,
+            about: sectionFlags.about ? '#about' : null,
+            experience: sectionFlags.experience ? '#experience' : null,
+            skills: sectionFlags.skills ? '#experience' : null,
+            contact: sectionFlags.contact ? '#contact' : null
         };
 
         var observer = new IntersectionObserver(function (entries) {
@@ -394,7 +461,7 @@
 
             var scrollBottom = window.scrollY + window.innerHeight;
             var docBottom = document.documentElement.scrollHeight;
-            if (docBottom - scrollBottom <= 2) {
+            if (contactHref && docBottom - scrollBottom <= 2) {
                 setActiveLinkByHref(contactHref);
             }
         }
@@ -584,7 +651,12 @@
         var container = document.getElementById('about-content');
         if (!container) return;
 
+        var websiteHtml = about.about_website && about.about_website.trim()
+            ? '<div class="about-website-section"><div class="about-text">' + about.about_website + '</div></div>'
+            : '';
+
         container.innerHTML =
+            websiteHtml +
             '<div class="about-photo-col">' +
                 '<img src="/static/images/profile-photo.png" alt="Rayleigh Xu" class="about-photo">' +
             '</div>' +
@@ -935,7 +1007,7 @@
        12. INIT
        ---------------------------------------------------------------------- */
 
-    async function init(dataPromise) {
+    async function init(dataPromise, sectionFlags) {
         // Theme and navbar can run immediately
         setupThemeToggle();
         setupNavbar();
@@ -952,15 +1024,31 @@
             var experience = results[6];
             var contact    = results[7];
 
-            renderHero(profile);
-            setupHeroParallax();
-            renderMetrics(metrics);
-            renderServices(services);
-            renderProjects(projects);
-            renderAbout(about);
-            renderExperience(experience);
-            renderSkills(skills);
-            renderContact(contact);
+            if (sectionFlags.hero) {
+                renderHero(profile);
+                setupHeroParallax();
+            }
+            if (sectionFlags.metrics && metrics) {
+                renderMetrics(metrics);
+            }
+            if (sectionFlags.services && services) {
+                renderServices(services);
+            }
+            if (sectionFlags.projects && projects) {
+                renderProjects(projects);
+            }
+            if (sectionFlags.about && about) {
+                renderAbout(about);
+            }
+            if (sectionFlags.experience && experience) {
+                renderExperience(experience);
+            }
+            if (sectionFlags.skills && skills) {
+                renderSkills(skills);
+            }
+            if (sectionFlags.contact && contact) {
+                renderContact(contact);
+            }
 
             setupScrollAnimations();
             setupTitleAnimations();
@@ -982,19 +1070,13 @@
     // Theme must apply before loader (so loader has correct bg)
     applyTheme(getTheme());
 
+    var sectionConfig = getSectionConfig();
+    var sectionFlags = getSectionFlags(sectionConfig);
+
     // Start fetching data immediately (in parallel with loader animation)
-    var dataPromise = Promise.all([
-        fetchJSON('/api/profile'),
-        fetchJSON('/api/metrics'),
-        fetchJSON('/api/about'),
-        fetchJSON('/api/skills'),
-        fetchJSON('/api/services'),
-        fetchJSON('/api/projects'),
-        fetchJSON('/api/experience'),
-        fetchJSON('/api/contact')
-    ]);
+    var dataPromise = fetchSectionData(sectionFlags);
 
     runPageLoader(function () {
-        init(dataPromise);
+        init(dataPromise, sectionFlags);
     });
 })();

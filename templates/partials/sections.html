@@ -1,0 +1,62 @@
+{% macro render_section(key) %}
+{% if key == 'hero' %}
+    <section id="hero" class="section hero-section">
+        <div class="section-content">
+            <div id="hero-content"></div>
+        </div>
+        <div class="scroll-indicator">
+            <span class="chevron"></span>
+        </div>
+    </section>
+{% elif key == 'metrics' %}
+    <section id="metrics" class="section animate-on-scroll">
+        <div class="section-content">
+            <div id="metrics-content" class="metrics-grid"></div>
+        </div>
+    </section>
+{% elif key == 'services' %}
+    <section id="services" class="section animate-on-scroll">
+        <div class="section-content">
+            <h2 class="section-title">Services</h2>
+            <p class="section-subtitle">What I can do for you</p>
+            <div id="services-content" class="services-grid"></div>
+        </div>
+    </section>
+{% elif key == 'projects' %}
+    <section id="projects" class="section animate-on-scroll">
+        <div class="section-content">
+            <h2 class="section-title">Projects</h2>
+            <p class="section-subtitle">A selection of things I have worked on</p>
+            <div id="projects-content" class="projects-grid"></div>
+        </div>
+    </section>
+{% elif key == 'about' %}
+    <section id="about" class="section animate-on-scroll">
+        <div class="section-content">
+            <div id="about-content" class="about-grid"></div>
+        </div>
+    </section>
+{% elif key == 'experience' %}
+    <section id="experience" class="section animate-on-scroll">
+        <div class="section-content">
+            <h2 class="section-title">Experience</h2>
+            <div id="experience-content" class="timeline"></div>
+        </div>
+    </section>
+{% elif key == 'skills' %}
+    <section id="skills" class="section animate-on-scroll">
+        <div class="section-content">
+            <h3 class="section-subheader">Skills</h3>
+            <div id="skills-content"></div>
+        </div>
+    </section>
+{% elif key == 'contact' %}
+    <section id="contact" class="section animate-on-scroll">
+        <div class="section-content">
+            <h2 class="section-title">Get In Touch</h2>
+            <p class="section-subtitle">I'd love to hear from you</p>
+            <div id="contact-content" class="contact-grid"></div>
+        </div>
+    </section>
+{% endif %}
+{% endmacro %}

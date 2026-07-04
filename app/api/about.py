@@ -8,6 +8,7 @@ router = APIRouter(prefix="/api", tags=["content"])
 
 class AboutResponse(BaseModel):
     about_me: str
+    about_website: str
     about_logo: str
 
 
@@ -15,5 +16,6 @@ class AboutResponse(BaseModel):
 async def get_about():
     return {
         "about_me": load_markdown_as_html("about_me.md"),
+        "about_website": load_markdown_as_html("about_website.md"),
         "about_logo": load_markdown_as_html("about_freelanxur.md"),
     }

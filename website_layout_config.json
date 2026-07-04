@@ -1,0 +1,12 @@
+{
+  "sections": [
+    { "key": "hero", "enabled": true },
+    { "key": "about", "enabled": true },
+    { "key": "metrics", "enabled": false },
+    { "key": "services", "enabled": false },
+    { "key": "projects", "enabled": true },
+    { "key": "experience", "enabled": false },
+    { "key": "skills", "enabled": false },
+    { "key": "contact", "enabled": true }
+  ]
+}
