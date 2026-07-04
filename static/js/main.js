@@ -520,7 +520,6 @@
         var container = document.getElementById('hero-content');
         if (!container) return;
 
-        var statusClass = profile.status_available ? 'available' : 'unavailable';
         var fullName = profile.first_name + ' ' + profile.last_name;
 
         // If the loader brand still exists, render a slot for it to morph into;
@@ -537,11 +536,7 @@
             '<p class="hero-greeting">Hi, I\'m</p>' +
             '<h1 class="hero-name"><span class="typing-text">' + escapeHTML(fullName) + '</span></h1>' +
             titleHtml +
-            '<p class="hero-tagline">' + escapeHTML(profile.tagline) + '</p>' +
-            '<div class="status-badge ' + statusClass + '">' +
-                '<span class="status-dot"></span>' +
-                escapeHTML(profile.status) +
-            '</div>';
+            '<p class="hero-tagline">' + escapeHTML(profile.tagline) + '</p>';
 
         // Trigger typing animation after a short delay
         requestAnimationFrame(function () {

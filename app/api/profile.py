@@ -11,8 +11,6 @@ class ProfileResponse(BaseModel):
     last_name: str
     title: str
     tagline: str
-    status: str
-    status_available: bool
     page_title: str
     footer: str
 
