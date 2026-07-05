@@ -358,23 +358,34 @@
     function setupHeroParallax() {
         var heroContent = document.querySelector('.hero-section .section-content');
         var heroSection = document.querySelector('.hero-section');
+        var scrollIndicator = document.querySelector('.hero-section .scroll-indicator');
         if (!heroContent || !heroSection) return;
 
-        // Skip for reduced motion or mobile
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        if (window.innerWidth < 768) return;
 
         heroContent.classList.add('hero-parallax');
 
-        window.addEventListener('scroll', function () {
+        function updateHeroScroll() {
             var scrollY = window.scrollY;
             var heroHeight = heroSection.offsetHeight;
+            var progress = Math.min(scrollY / heroHeight, 1);
 
-            // Only apply within hero section bounds
-            if (scrollY > heroHeight) return;
+            var translateY = scrollY * 0.2;
+            var translateZ = -progress * 700;
+            var scale = 1 - progress * 0.45;
+            var opacity = 1 - progress * 0.9;
 
-            heroContent.style.transform = 'translateY(' + (scrollY * 0.4) + 'px)';
-        }, { passive: true });
+            heroContent.style.transform =
+                'translate3d(0, ' + translateY + 'px, ' + translateZ + 'px) scale(' + scale + ')';
+            heroContent.style.opacity = opacity;
+
+            if (scrollIndicator) {
+                scrollIndicator.style.opacity = String(Math.max(0, 1 - progress * 2.5));
+            }
+        }
+
+        window.addEventListener('scroll', updateHeroScroll, { passive: true });
+        updateHeroScroll();
     }
 
     function setupNavHighlighting() {
