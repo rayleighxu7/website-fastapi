@@ -1,6 +1,6 @@
 [
   {
-    "title": "Data Consultant",
+    "title": "Member of Technical Staff",
     "company": "freelanxur",
     "start_date": "November 2025",
     "end_date": "Present",
@@ -16,16 +16,16 @@
     "end_date": "Present",
     "description": "",
     "cv_bullets": [
-      "Led the migration and onboarding of over $100B in assets onto Caruso's platform.",
+      "Led the data migration and onboarding of over $100B in assets onto Caruso's platform.",
       "Designed and established data team processes to enhance collaboration and efficiency.",
       "Developed internal tooling and packages to streamline client implementations, ongoing services, and support workflows.",
+      "Developed an MCP server for SQL and DynamoDB databases, enabling Claude to assist with data analysis and reporting.",
       "Built complex applications to address product gaps, including AU/NZ tax filing automation, bulk payment converters, and scheduled reporting systems.",
-      "Built an integration producing XML files for Xplan.",
+      "Built an integration with Iress Xplan to ingest investor data to financial advisers daily",
       "All tooling and applications maintained and deployed through Terraform in AWS infrastructure.",
       "Collaborated with software engineers to design an optimized SQL data model supporting efficient GraphQL queries.",
-      "Responsible for transforming and migrating client legacy data.",
-      "Assisted in managing and servicing clients with CRM and Unit Registry data updates post go-live.",
-      "Developed custom scripts to assist clients in reporting and analysis."
+      "Provided data services to clients with CRM and Registry updates.",
+      "Developed custom scripts to automate client reporting and enhance data analysis workflows."
     ]
   },
   {
