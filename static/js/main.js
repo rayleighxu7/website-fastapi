@@ -196,57 +196,36 @@
             // Double-rAF: wait for hero to render + paint before measuring
             requestAnimationFrame(function () {
                 requestAnimationFrame(function () {
-                    var slot = document.querySelector('.hero-title-slot');
-                    if (!slot) return;
+                    var target = document.querySelector('.hero-title-morph-target');
+                    if (!target) return;
 
-                    // Match slot to .hero-title box model for accurate measurement
-                    slot.style.height = brandRect.height + 'px';
-                    slot.style.marginTop = '8px';
-                    var slotRect = slot.getBoundingClientRect();
+                    // Align the floating brand to the real title by measuring the
+                    // logo elements directly. The logo is the shared visual anchor,
+                    // so matching its top-left lands both logo and text pixel-perfect
+                    // regardless of container centering, text width or scrollbars.
+                    var brandLogo = loaderBrand.querySelector('.loader-logo');
+                    var targetLogo = target.querySelector('.logo-img');
+                    if (!brandLogo || !targetLogo) return;
+
+                    var brandLogoRect = brandLogo.getBoundingClientRect();
+                    var targetLogoRect = targetLogo.getBoundingClientRect();
 
                     // Compute movement via transform (GPU-composited)
-                    var dx = (slotRect.left + slotRect.width / 2) - (brandRect.left + brandRect.width / 2);
-                    var dy = slotRect.top - brandRect.top;
+                    var dx = targetLogoRect.left - brandLogoRect.left;
+                    var dy = targetLogoRect.top - brandLogoRect.top;
 
                     loaderBrand.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
                     loaderBrand.style.transform = 'translate(' + dx + 'px, ' + dy + 'px)';
 
-                    // After animation completes, reparent into DOM
+                    // After animation completes, reveal the real title and drop the
+                    // floating clone in the same frame so there is no flicker/jump.
                     var handoffDone = false;
                     function doHandoff() {
                         if (handoffDone) return;
                         handoffDone = true;
 
-                        // 1. Hide and kill transition BEFORE clearing position/transform
-                        loaderBrand.style.visibility = 'hidden';
-                        loaderBrand.style.transition = 'none';
-
-                        // 2. Clear slot sizing
-                        slot.style.height = '';
-                        slot.style.marginTop = '';
-
-                        // 3. Swap child classes
-                        var lt = loaderBrand.querySelector('.loader-text');
-                        if (lt) { lt.removeAttribute('style'); lt.className = 'title-text'; }
-                        var ll = loaderBrand.querySelector('.loader-logo');
-                        if (ll) { ll.removeAttribute('style'); ll.className = 'logo-img'; }
-
-                        // 4. Clear brand positioning (visibility stays hidden)
-                        loaderBrand.style.position = '';
-                        loaderBrand.style.left = '';
-                        loaderBrand.style.top = '';
-                        loaderBrand.style.zIndex = '';
-                        loaderBrand.style.margin = '';
-                        loaderBrand.style.transform = '';
-                        loaderBrand.className = 'hero-title';
-                        slot.parentNode.replaceChild(loaderBrand, slot);
-
-                        // 5. Reveal at final position next frame
-                        requestAnimationFrame(function () {
-                            loaderBrand.style.transition = '';
-                            loaderBrand.style.visibility = '';
-                        });
-
+                        target.style.visibility = '';
+                        loaderBrand.remove();
                         loader.remove();
                     }
 
@@ -600,15 +579,16 @@
 
         var fullName = profile.first_name + ' ' + profile.last_name;
 
-        // If the loader brand still exists, render a slot for it to morph into;
-        // otherwise (loader skipped / hard refresh) render the title directly.
+        // Render the real hero title in both cases so layout is identical. When
+        // the loader brand exists, keep it hidden (but laid out) so the floating
+        // brand can morph onto its exact final position, then reveal it.
         var loaderBrand = document.querySelector('.loader-brand');
+        var heroTitleInner =
+            '<img src="/static/images/gold-logo-transparent-bg.PNG" alt="freelanxur" class="logo-img" height="60">' +
+            '<span class="title-text">freelanxur</span>';
         var titleHtml = loaderBrand
-            ? '<div class="hero-title-slot"></div>'
-            : '<div class="hero-title">' +
-                  '<img src="/static/images/gold-logo-transparent-bg.PNG" alt="freelanxur" class="logo-img" height="60">' +
-                  '<span class="title-text">freelanxur</span>' +
-              '</div>';
+            ? '<div class="hero-title hero-title-morph-target" style="visibility: hidden;">' + heroTitleInner + '</div>'
+            : '<div class="hero-title">' + heroTitleInner + '</div>';
 
         container.innerHTML =
             '<p class="hero-greeting">Hi, I\'m</p>' +
@@ -632,10 +612,11 @@
             }
         });
 
-        // Apply staggered entrance to hero children (skip title slot, brand fills it)
+        // Apply staggered entrance to hero children (skip the morph target,
+        // the floating brand animates into its place instead)
         var heroChildren = container.children;
         for (var i = 0; i < heroChildren.length; i++) {
-            if (!heroChildren[i].classList.contains('hero-title-slot')) {
+            if (!heroChildren[i].classList.contains('hero-title-morph-target')) {
                 heroChildren[i].classList.add('hero-stagger');
             }
         }
