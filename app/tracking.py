@@ -31,14 +31,6 @@ def _ua_family(user_agent: str) -> str:
     return user_agent.split(" ", 1)[0][:128]
 
 
-def _referrer_host(request: Request) -> str | None:
-    referrer = request.headers.get("referer", "").strip()
-    if not referrer:
-        return None
-    parsed = urlparse(referrer)
-    return parsed.netloc or None
-
-
 def _visitor_hash(request: Request) -> str:
     ip = _get_client_ip(request)
     ua = request.headers.get("user-agent", "")
@@ -61,7 +53,6 @@ def _ensure_table(conn: pymysql.connections.Connection) -> None:
                 click_target VARCHAR(255) NULL,
                 path VARCHAR(255) NOT NULL,
                 visitor_hash CHAR(64) NOT NULL,
-                referrer_host VARCHAR(255) NULL,
                 metadata JSON NOT NULL,
                 INDEX idx_tracking_events_ts (ts),
                 INDEX idx_tracking_events_click_target (click_target),
@@ -148,15 +139,14 @@ def track_event(
         with conn.cursor() as cur:
             cur.execute(
                 """
-                INSERT INTO tracking_events (event_type, click_target, path, visitor_hash, referrer_host, metadata)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                INSERT INTO tracking_events (event_type, click_target, path, visitor_hash, metadata)
+                VALUES (%s, %s, %s, %s, %s)
                 """,
                 (
                     event_type,
                     click_target,
                     request.url.path,
                     _visitor_hash(request),
-                    _referrer_host(request),
                     json.dumps(payload),
                 ),
             )
@@ -193,7 +183,7 @@ def get_tracking_summary(limit: int | None = None) -> dict[str, Any]:
 
             cur.execute(
                 """
-                SELECT ts, event_type, click_target, path, referrer_host, metadata
+                SELECT ts, event_type, click_target, path, metadata
                 FROM tracking_events
                 ORDER BY ts DESC
                 LIMIT %s
@@ -214,14 +204,13 @@ def get_tracking_summary(limit: int | None = None) -> dict[str, Any]:
             "event_type": event_type,
             "click_target": click_target,
             "path": path,
-            "referrer_host": referrer_host,
             "metadata": (
                 json.loads(metadata)
                 if isinstance(metadata, str)
                 else (metadata or {})
             ),
         }
-        for ts, event_type, click_target, path, referrer_host, metadata in recent_rows
+        for ts, event_type, click_target, path, metadata in recent_rows
     ]
 
     return {
