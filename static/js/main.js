@@ -488,6 +488,76 @@
         return res.json();
     }
 
+    function postTrackingEvent(url, payload) {
+        var body = JSON.stringify(payload || {});
+        if (navigator.sendBeacon) {
+            var blob = new Blob([body], { type: 'application/json' });
+            navigator.sendBeacon(url, blob);
+            return;
+        }
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: body,
+            keepalive: true
+        }).catch(function () {
+            // Best-effort tracking only.
+        });
+    }
+
+    function setupButtonClickTracking() {
+        var clickSelector = [
+            '.contact-card',
+            '.project-card',
+            '.project-link'
+        ].join(', ');
+
+        document.addEventListener('click', function (event) {
+            var target = event.target.closest(clickSelector);
+            if (!target) return;
+
+            var clickArea = target.closest('.contact-card') ? 'contact' : 'projects';
+            var clickTarget = null;
+
+            if (clickArea === 'contact') {
+                var contactLabel = target.querySelector('.contact-label');
+                if (contactLabel && contactLabel.textContent) {
+                    clickTarget = contactLabel.textContent.trim().toLowerCase().replace(/\s+/g, '-');
+                } else if (target.getAttribute && target.getAttribute('href')) {
+                    clickTarget = target.getAttribute('href');
+                }
+            } else {
+                var projectCard = target.closest('.project-card');
+                var projectTitleEl = projectCard ? projectCard.querySelector('.project-title') : null;
+                if (projectTitleEl && projectTitleEl.textContent) {
+                    clickTarget = projectTitleEl.textContent.trim();
+                } else if (target.classList.contains('project-link')) {
+                    clickTarget = 'project-link';
+                } else if (target.getAttribute && target.getAttribute('href')) {
+                    clickTarget = target.getAttribute('href');
+                }
+            }
+
+            var text = (target.textContent || '').trim().replace(/\s+/g, ' ');
+            var payload = {
+                source: 'contact_projects_tracking',
+                area: clickArea,
+                click_target: clickTarget,
+                tag: target.tagName ? target.tagName.toLowerCase() : 'unknown',
+                id: target.id || null,
+                class_name: target.className || null,
+                text: text ? text.slice(0, 120) : null,
+                href: target.getAttribute && target.getAttribute('href')
+                    ? target.getAttribute('href')
+                    : null,
+                current_path: window.location.pathname
+            };
+
+            postTrackingEvent('/api/events/click', payload);
+        }, { passive: true });
+    }
+
     /* ----------------------------------------------------------------------
        4. SVG ICON MAP
        ---------------------------------------------------------------------- */
@@ -788,7 +858,7 @@
                 '<div class="contact-label">LinkedIn</div>' +
                 '<div class="contact-value">' + escapeHTML(contact.linkedin) + '</div>' +
             '</a>' +
-            '<a class="contact-card glow-card animate-on-scroll" href="/api/download-cv" download style="animation-delay: 0.3s">' +
+            '<a id="download-cv-link" class="contact-card glow-card animate-on-scroll" href="/api/download-cv" download style="animation-delay: 0.3s">' +
                 '<div class="contact-icon">\uD83D\uDCC4</div>' +
                 '<div class="contact-label">Download CV</div>' +
                 '<div class="contact-value">One-page PDF</div>' +
@@ -1067,6 +1137,7 @@
 
     // Start fetching data immediately (in parallel with loader animation)
     var dataPromise = fetchSectionData(sectionFlags);
+    setupButtonClickTracking();
 
     runPageLoader(function () {
         init(dataPromise, sectionFlags);

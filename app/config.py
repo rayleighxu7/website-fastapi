@@ -36,6 +36,12 @@ class Settings(BaseSettings):
     )
 
     DEBUG: bool = True
+    TRACKING_ENABLED: bool = True
+    DATABASE_URL: str | None = None
+    MYSQL_URL: str | None = None
+    TRACKING_HASH_SALT: str = "change-me-in-production"
+    TRACKING_ADMIN_KEY: str = "change-me-in-production"
+    TRACKING_RECENT_EVENTS_LIMIT: int = 25
 
     def sections_config(self) -> list[dict[str, str | bool | None]]:
         from app.layout import load_sections_config
