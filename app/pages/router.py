@@ -36,3 +36,16 @@ async def index(request: Request, background_tasks: BackgroundTasks):
         },
         background=background_tasks,
     )
+
+
+@router.get("/privacy")
+async def privacy(request: Request):
+    profile = load_json("profile.json")
+    return templates.TemplateResponse(
+        "privacy.html",
+        {
+            "request": request,
+            "v": _ASSET_VERSION,
+            "footer": profile.get("footer", ""),
+        },
+    )

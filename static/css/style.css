@@ -1226,7 +1226,7 @@ a {
     border-top: none;
     padding: 48px 20px 40px;
     text-align: center;
-    overflow: hidden;
+    overflow: visible;
     transition: border-color 0.3s ease;
 }
 
@@ -1268,6 +1268,70 @@ a {
     letter-spacing: 0.3px;
 }
 
+.footer-links {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 5;
+}
+
+.footer-links a {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.footer-links a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.privacy-hover {
+    position: relative;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    border-bottom: 1px dashed var(--text-muted);
+    cursor: help;
+}
+
+.privacy-hover:focus {
+    outline: none;
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.privacy-tooltip {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 10px);
+    transform: translateX(-50%);
+    width: min(420px, calc(100vw - 24px));
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: rgba(var(--surface-rgb), 0.96);
+    border: 1px solid var(--card-border-hover);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.45;
+    text-align: left;
+    box-shadow: 0 12px 28px var(--shadow-lg);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.18s ease, visibility 0.18s ease;
+    z-index: 20;
+}
+
+.privacy-hover:hover .privacy-tooltip,
+.privacy-hover:focus .privacy-tooltip,
+.privacy-hover:focus-within .privacy-tooltip {
+    opacity: 1;
+    visibility: visible;
+}
+
 .footer-watermark {
     position: absolute;
     top: 50%;
@@ -1282,6 +1346,53 @@ a {
 /* --------------------------------------------------------------------------
    15. BUTTONS
    -------------------------------------------------------------------------- */
+
+.legal-page {
+    min-height: calc(100vh - 120px);
+    padding: 96px 20px 40px;
+}
+
+.legal-content {
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+.legal-back-link {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: var(--accent);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.legal-header h1 {
+    margin: 0 0 8px;
+    font-size: 2rem;
+}
+
+.legal-header p {
+    margin: 0 0 24px;
+    color: var(--text-secondary);
+}
+
+.legal-section {
+    margin-bottom: 28px;
+}
+
+.legal-section h2 {
+    margin: 0 0 10px;
+    font-size: 1.2rem;
+}
+
+.legal-section p,
+.legal-section li {
+    color: var(--text-secondary);
+}
+
+.legal-section ul {
+    margin: 0;
+    padding-left: 22px;
+}
 
 .btn {
     display: inline-flex;

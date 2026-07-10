@@ -42,6 +42,10 @@ class Settings(BaseSettings):
     TRACKING_HASH_SALT: str = "change-me-in-production"
     TRACKING_ADMIN_KEY: str = "change-me-in-production"
     TRACKING_RECENT_EVENTS_LIMIT: int = 25
+    TRACKING_RETENTION_DAYS: int = 30
+    TRACKING_VISIT_DEDUPE_SECONDS: int = 3600
+    TRACKING_CLICK_DEDUPE_SECONDS: int = 2
+    TRACKING_FILTER_BOTS: bool = True
 
     def sections_config(self) -> list[dict[str, str | bool | None]]:
         from app.layout import load_sections_config
