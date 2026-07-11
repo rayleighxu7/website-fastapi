@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Privacy notice for freelanxur.">
+    <title>Privacy Notice | freelanxur</title>
+    <link rel="icon" href="/static/images/black-logo-yellow-bg.PNG" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css?v={{ v }}">
+</head>
+<body>
+    <main class="legal-page">
+        <div class="legal-content">
+            <a href="/" class="legal-back-link">Back to Home</a>
+
+            <header class="legal-header">
+                <h1>Privacy Notice</h1>
+                <p>Last updated: July 2026</p>
+            </header>
+
+            <section class="legal-section">
+                <h2>What is collected</h2>
+                <p>This website collects a small amount of first-party analytics to understand traffic patterns and site usage.</p>
+                <ul>
+                    <li>Page visit events</li>
+                    <li>Button click events for contact and project interactions</li>
+                    <li>Technical metadata such as event path, timestamp, and click target label</li>
+                    <li>Raw IP address stored temporarily for abuse prevention and analytics quality checks</li>
+                    <li>A salted, one-way hashed visitor identifier derived from request IP and user-agent</li>
+                </ul>
+            </section>
+
+            <section class="legal-section">
+                <h2>What is not collected</h2>
+                <ul>
+                    <li>No advertising trackers</li>
+                    <li>No sale of personal information</li>
+                    <li>No use of analytics data for ad targeting or profiling</li>
+                </ul>
+            </section>
+
+            <section class="legal-section">
+                <h2>Why this data is used</h2>
+                <ul>
+                    <li>Understand which sections and project/contact actions are useful</li>
+                    <li>Detect bot/noise traffic patterns</li>
+                    <li>Improve site content and user experience</li>
+                </ul>
+            </section>
+
+            <section class="legal-section">
+                <h2>Retention</h2>
+                <p>Raw IP addresses are automatically removed after 30 days. A hashed version of your IP, along with your click history, is retained indefinitely to recognize returning visitors over time.</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>Sharing</h2>
+                <p>This data is not sold. It is stored in the site owner's analytics records and processed only by infrastructure providers needed to run this website (for example, hosting and database services).</p>
+            </section>
+
+            <section class="legal-section">
+                <h2>Your options</h2>
+                <p>Email rayleighxu7@live.com to request access or deletion. For visits older than 30 days, include the IP address used at the time so a hash comparison can be attempted against stored hashed records.</p>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <img src="/static/images/gold-logo-transparent-bg.PNG" alt="" class="footer-watermark" aria-hidden="true">
+        <div class="footer-content">
+            <span>{{ footer }}</span>
+            <div class="footer-links">
+                <a href="/">Home</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var THEME_KEY = 'theme';
+            var root = document.documentElement;
+            var saved = localStorage.getItem(THEME_KEY) || 'dark';
+            root.dataset.theme = saved;
+        })();
+    </script>
+</body>
+</html>
