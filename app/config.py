@@ -46,6 +46,12 @@ class Settings(BaseSettings):
     TRACKING_VISIT_DEDUPE_SECONDS: int = 3600
     TRACKING_CLICK_DEDUPE_SECONDS: int = 2
     TRACKING_FILTER_BOTS: bool = True
+    # Drop further tracking writes from one visitor after this many database
+    # attempts in an hour. Repeats inside the dedupe window do not count.
+    TRACKING_MAX_WRITES_PER_VISITOR_HOUR: int = 30
+    # Hard cap on tracking connections per process. Stops crawler floods from
+    # holding the database open; quiet portfolio traffic stays well under it.
+    TRACKING_MAX_DB_OPS_PER_MINUTE: int = 120
 
     def sections_config(self) -> list[dict[str, str | bool | None]]:
         from app.layout import load_sections_config
