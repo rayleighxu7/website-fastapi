@@ -78,7 +78,7 @@ The single-page site renders these sections in order:
 
 | Section | Description |
 |---|---|
-| Hero | Name, tagline, availability badge, scroll indicator |
+| Hero | Name, brand line, tagline, call-to-action buttons, scroll indicator |
 | Metrics | Stats strip (years of experience, projects, etc.) |
 | About | Bio, logo story, and services grid (combined section) |
 | Projects | Project cards with tags, links, NDA handling |
@@ -119,7 +119,13 @@ The frontend is vanilla JS and CSS with no build step.
 ### Animations & Effects
 
 - Page loader (split-reveal, once per session via sessionStorage)
-- Hero parallax scroll + gradient glow orb
+- Site-wide diagonal gold light beams (fixed canvas, beams travel down the page as you scroll)
+- Hero parallax scroll
+- Circular theme-switch reveal (View Transitions API)
+- Floating island navbar with sliding pill indicator
+- CSS scroll-driven section header reveals (`animation-timeline: view()`)
+- Logo tile that flips into an E/T/L bar chart on hover/tap
+- Spinning gold conic border on project card and About tile hover
 - Staggered card entrance animations
 - Cursor-tracking glow on cards (hover devices only)
 - Magnetic button displacement on hover

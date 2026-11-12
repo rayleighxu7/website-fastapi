@@ -79,14 +79,6 @@
         if (topToggle) {
             topToggle.setAttribute('aria-pressed', String(theme === DARK));
         }
-
-        // Update GitHub icon in contact card when present.
-        const ghIcon = document.getElementById('github-icon');
-        if (ghIcon) {
-            ghIcon.src = theme === DARK
-                ? '/static/images/github-logo-dark.png'
-                : '/static/images/github-logo-light.png';
-        }
     }
 
     function setupThemeToggle() {
@@ -97,7 +89,35 @@
 
         btn.addEventListener('click', function () {
             var next = getTheme() === DARK ? LIGHT : DARK;
-            applyTheme(next);
+            var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (!document.startViewTransition || reduceMotion) {
+                applyTheme(next);
+                return;
+            }
+
+            // Reveal the new theme as a circle growing out of the toggle button
+            var rect = btn.getBoundingClientRect();
+            var x = rect.left + rect.width / 2;
+            var y = rect.top + rect.height / 2;
+            var radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
+
+            document.startViewTransition(function () {
+                applyTheme(next);
+            }).ready.then(function () {
+                document.documentElement.animate(
+                    {
+                        clipPath: [
+                            'circle(0px at ' + x + 'px ' + y + 'px)',
+                            'circle(' + radius + 'px at ' + x + 'px ' + y + 'px)'
+                        ]
+                    },
+                    {
+                        duration: 650,
+                        easing: 'cubic-bezier(0.65, 0, 0.35, 1)',
+                        pseudoElement: '::view-transition-new(root)'
+                    }
+                );
+            });
         });
     }
 
@@ -125,7 +145,7 @@
         // Hide navbar off-screen so it can slide in later
         var navbar = document.getElementById('navbar');
         if (navbar) {
-            navbar.style.transform = 'translateY(-100%)';
+            navbar.style.transform = 'translateY(calc(-100% - 24px))';
         }
 
         // Measure the natural text width so the transition has an exact target
@@ -508,7 +528,7 @@
 
     function setupButtonClickTracking() {
         var clickSelector = [
-            '.contact-card',
+            '.contact-action',
             '.project-card',
             '.project-link'
         ].join(', ');
@@ -517,13 +537,12 @@
             var target = event.target.closest(clickSelector);
             if (!target) return;
 
-            var clickArea = target.closest('.contact-card') ? 'contact' : 'projects';
+            var clickArea = target.closest('.contact-action') ? 'contact' : 'projects';
             var clickTarget = null;
 
             if (clickArea === 'contact') {
-                var contactLabel = target.querySelector('.contact-label');
-                if (contactLabel && contactLabel.textContent) {
-                    clickTarget = contactLabel.textContent.trim().toLowerCase().replace(/\s+/g, '-');
+                if (target.dataset.track) {
+                    clickTarget = target.dataset.track;
                 } else if (target.getAttribute && target.getAttribute('href')) {
                     clickTarget = target.getAttribute('href');
                 }
@@ -574,28 +593,18 @@
     }
 
     /* ----------------------------------------------------------------------
-       5. TAG HUE MAP & HELPERS
+       5. UI ICONS
        ---------------------------------------------------------------------- */
 
-    var TAG_HUES = {
-        'Python': 210, 'SQL': 200, 'Excel': 140, 'AI': 280,
-        'Git': 30, 'Docker': 200, 'AWS': 30, 'GitHub': 270,
-        'FastAPI': 170, 'Streamlit': 0, 'HTML/CSS': 15,
-        'Splink': 260, 'SQL/BigQuery': 200, 'Fivetran': 180,
-        'Hex.Tech': 320
+    var UI_ICONS = {
+        arrowRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+        arrowUpRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>',
+        mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m22 7-10 6L2 7"/></svg>',
+        copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+        github: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.7 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z"/></svg>',
+        linkedin: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.4 20.5h-3.6v-5.6c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9v5.7H9.3V9h3.4v1.6c.5-.9 1.6-1.8 3.4-1.8 3.6 0 4.3 2.4 4.3 5.5v6.2ZM5.3 7.4a2.1 2.1 0 1 1 0-4.2 2.1 2.1 0 0 1 0 4.2ZM7.1 20.5H3.5V9h3.6v11.5ZM22.2 0H1.8C.8 0 0 .8 0 1.7v20.6c0 .9.8 1.7 1.8 1.7h20.4c1 0 1.8-.8 1.8-1.7V1.7C24 .8 23.2 0 22.2 0Z"/></svg>',
+        cv: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></svg>'
     };
-
-    function hashHue(str) {
-        var hash = 0;
-        for (var i = 0; i < str.length; i++) {
-            hash = str.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        return Math.abs(hash) % 360;
-    }
-
-    function tagHue(tag) {
-        return TAG_HUES[tag] !== undefined ? TAG_HUES[tag] : hashHue(tag);
-    }
 
     /* ----------------------------------------------------------------------
        6. DURATION CALCULATION
@@ -643,7 +652,7 @@
        8. SECTION RENDERERS
        ---------------------------------------------------------------------- */
 
-    function renderHero(profile) {
+    function renderHero(profile, sectionFlags) {
         var container = document.getElementById('hero-content');
         if (!container) return;
 
@@ -660,27 +669,25 @@
             ? '<div class="hero-title hero-title-morph-target" style="visibility: hidden;">' + heroTitleInner + '</div>'
             : '<div class="hero-title">' + heroTitleInner + '</div>';
 
+        var taglineHtml = profile.tagline
+            ? '<p class="hero-tagline">' + escapeHTML(profile.tagline) + '</p>'
+            : '';
+
+        var ctas = [];
+        if (sectionFlags.projects) {
+            ctas.push('<a class="btn btn-accent" href="#projects">See my work ' + UI_ICONS.arrowRight + '</a>');
+        }
+        if (sectionFlags.contact) {
+            ctas.push('<a class="btn btn-ghost" href="#contact">Get in touch</a>');
+        }
+        var ctasHtml = ctas.length ? '<div class="hero-ctas">' + ctas.join('') + '</div>' : '';
+
         container.innerHTML =
             '<p class="hero-greeting">Hi, I\'m</p>' +
-            '<h1 class="hero-name"><span class="typing-text">' + escapeHTML(fullName) + '</span></h1>' +
+            '<h1 class="hero-name">' + escapeHTML(fullName) + '</h1>' +
             titleHtml +
-            '<p class="hero-tagline">' + escapeHTML(profile.tagline) + '</p>';
-
-        // Trigger typing animation after a short delay
-        requestAnimationFrame(function () {
-            var typingEl = container.querySelector('.typing-text');
-            if (typingEl) {
-                typingEl.style.display = 'inline-block';
-                typingEl.style.whiteSpace = 'nowrap';
-                var naturalWidth = Math.ceil(typingEl.getBoundingClientRect().width) + 1;
-                typingEl.style.boxSizing = 'content-box';
-                typingEl.style.setProperty('--typing-width', naturalWidth + 'px');
-                typingEl.style.overflow = 'hidden';
-                typingEl.style.borderRight = '3px solid var(--accent)';
-                typingEl.style.width = '0';
-                typingEl.style.animation = 'typing 1.8s steps(40, end) forwards, blink 0.75s step-end infinite';
-            }
-        });
+            taglineHtml +
+            ctasHtml;
 
         // Apply staggered entrance to hero children (skip the morph target,
         // the floating brand animates into its place instead)
@@ -690,7 +697,148 @@
                 heroChildren[i].classList.add('hero-stagger');
             }
         }
+    }
 
+    // Beams live in page coordinates on a fixed canvas, so one beam keeps travelling down the page as you scroll
+    function setupBackgroundBeams() {
+        var canvas = document.getElementById('bg-beams');
+        if (!canvas || !canvas.getContext) return;
+
+        var ctx = canvas.getContext('2d');
+        var ANGLE = 28 * Math.PI / 180;
+        var DX = Math.sin(ANGLE);
+        var DY = Math.cos(ANGLE);
+        var SLOPE = DX / DY;
+        var STEP = 90 / DY;
+        var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        var vw = 0;
+        var vh = 0;
+        var pageH = 0;
+        var beams = [];
+        var colors = {};
+
+        function readColors() {
+            var light = document.documentElement.dataset.theme === 'light';
+            colors.rgb = getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb').trim() || '245, 197, 66';
+            colors.track = light ? 'rgba(0, 0, 0, 0.045)' : 'rgba(255, 255, 255, 0.035)';
+            colors.tip = light ? 'rgb(' + colors.rgb + ')' : '#fff';
+        }
+
+        // Track k is the line x = k * STEP + y * SLOPE (page coordinates), clipped to the page
+        function track(k) {
+            var c = k * STEP;
+            var y0 = c >= 0 ? 0 : -c / SLOPE;
+            var y1 = Math.min(pageH, (vw - c) / SLOPE);
+            return { c: c, y0: y0, len: Math.max(0, (y1 - y0) / DY) };
+        }
+
+        function spawn(beam, midFlight) {
+            var kMin = Math.ceil(-pageH * SLOPE / STEP);
+            var kMax = Math.floor(vw / STEP);
+            var maxLen = Math.min(vw / DX, pageH / DY);
+            var t;
+            // Weight by track length so beams are spread evenly over the page
+            for (var tries = 0; tries < 20; tries++) {
+                beam.k = kMin + Math.floor(Math.random() * (kMax - kMin + 1));
+                t = track(beam.k);
+                if (Math.random() * maxLen < t.len) break;
+            }
+            beam.size = 110 + Math.random() * 90;
+            beam.speed = 0.35 + Math.random() * 0.3;
+            beam.s = midFlight ? Math.random() * t.len : -Math.random() * 600;
+        }
+
+        function resize() {
+            var dpr = Math.min(window.devicePixelRatio || 1, 2);
+            vw = canvas.clientWidth;
+            vh = canvas.clientHeight;
+            pageH = Math.max(document.documentElement.scrollHeight, vh);
+            canvas.width = Math.round(vw * dpr);
+            canvas.height = Math.round(vh * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            var count = Math.max(6, Math.min(60, Math.round(4 * pageH / vh)));
+            while (beams.length < count) {
+                var beam = {};
+                spawn(beam, true);
+                beams.push(beam);
+            }
+            beams.length = count;
+            draw();
+        }
+
+        function draw() {
+            var sy = window.scrollY;
+            ctx.clearRect(0, 0, vw, vh);
+
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = colors.track;
+            ctx.beginPath();
+            var kFrom = Math.ceil(-(sy + vh) * SLOPE / STEP);
+            var kTo = Math.floor((vw - sy * SLOPE) / STEP);
+            for (var k = kFrom; k <= kTo; k++) {
+                ctx.moveTo(k * STEP + sy * SLOPE, 0);
+                ctx.lineTo(k * STEP + (sy + vh) * SLOPE, vh);
+            }
+            ctx.stroke();
+
+            if (reduceMotion) return;
+
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.shadowColor = 'rgba(' + colors.rgb + ', 0.55)';
+            ctx.shadowBlur = 14;
+            beams.forEach(function (b) {
+                var t = track(b.k);
+                var headS = Math.min(b.s, t.len);
+                var tailS = Math.max(0, b.s - b.size);
+                if (headS <= tailS) return;
+
+                var hy = t.y0 + headS * DY;
+                var ty = t.y0 + tailS * DY;
+                if (hy < sy - 20 || ty > sy + vh + 20) return;
+
+                var hx = t.c + hy * SLOPE;
+                var tx = t.c + ty * SLOPE;
+                var g = ctx.createLinearGradient(tx, ty - sy, hx, hy - sy);
+                g.addColorStop(0, 'rgba(' + colors.rgb + ', 0)');
+                g.addColorStop(0.85, 'rgba(' + colors.rgb + ', 0.85)');
+                g.addColorStop(1, colors.tip);
+                ctx.strokeStyle = g;
+                ctx.beginPath();
+                ctx.moveTo(tx, ty - sy);
+                ctx.lineTo(hx, hy - sy);
+                ctx.stroke();
+            });
+            ctx.shadowBlur = 0;
+        }
+
+        readColors();
+        resize();
+        window.addEventListener('resize', resize);
+        if (window.ResizeObserver) new ResizeObserver(resize).observe(document.body);
+        new MutationObserver(function () {
+            readColors();
+            draw();
+        }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+        if (reduceMotion) {
+            window.addEventListener('scroll', function () { requestAnimationFrame(draw); }, { passive: true });
+            return;
+        }
+
+        var last = 0;
+        requestAnimationFrame(function frame(now) {
+            var dt = last ? Math.min(50, now - last) : 16;
+            last = now;
+            beams.forEach(function (b) {
+                b.s += b.speed * dt;
+                if (b.s - b.size > track(b.k).len) spawn(b, false);
+            });
+            draw();
+            requestAnimationFrame(frame);
+        });
     }
 
     function renderMetrics(metrics) {
@@ -709,30 +857,50 @@
         container.innerHTML = html;
     }
 
-    function renderAbout(about) {
+    function renderAbout(about, profile) {
         var container = document.getElementById('about-content');
         if (!container) return;
 
-        var websiteHtml = about.about_website && about.about_website.trim()
-            ? '<div class="about-website-section"><div class="about-text">' + about.about_website + '</div></div>'
+        var fullName = profile.first_name + ' ' + profile.last_name;
+        var introHtml = about.about_website && about.about_website.trim()
+            ? '<div class="about-tile about-intro glow-card animate-on-scroll">' +
+                '<div class="about-tile-label">// why you\'re here</div>' +
+                '<div class="about-text">' + about.about_website + '</div>' +
+              '</div>'
             : '';
 
         container.innerHTML =
-            websiteHtml +
-            '<div class="about-photo-col">' +
-                '<img src="/static/images/profile-photo.png" alt="Rayleigh Xu" class="about-photo">' +
+            introHtml +
+            '<div class="about-tile about-photo-tile glow-card animate-on-scroll" style="animation-delay: 0.08s">' +
+                '<img src="/static/images/profile-photo.png" alt="' + escapeHTML(fullName) + '" class="about-photo">' +
+                '<div class="about-photo-caption">' +
+                    '<span>' + escapeHTML(fullName) + '</span>' +
+                    '<span class="about-photo-brand">' + escapeHTML(profile.title) + '</span>' +
+                '</div>' +
             '</div>' +
-            '<div class="about-text-col">' +
-                '<h3 class="about-subtitle">Me</h3>' +
+            '<div class="about-tile about-me glow-card animate-on-scroll" style="animation-delay: 0.16s">' +
+                '<div class="about-tile-label">// me</div>' +
                 '<div class="about-text">' + about.about_me + '</div>' +
-                '<div class="about-logo-section">' +
-                    '<div class="about-logo-header">' +
-                        '<h3 class="about-logo-title">The Logo</h3>' +
-                        '<img src="/static/images/gold-logo-transparent-bg.PNG" alt="freelanxur logo" class="about-logo-icon">' +
-                    '</div>' +
+            '</div>' +
+            '<div class="about-tile about-logo-tile glow-card animate-on-scroll" style="animation-delay: 0.24s">' +
+                '<button type="button" class="about-logo-stage" aria-label="Turn the logo sideways" aria-pressed="false">' +
+                    '<span class="about-logo-bars" aria-hidden="true">' +
+                        '<span data-stage="E"></span><span data-stage="T"></span><span data-stage="L"></span>' +
+                    '</span>' +
+                '</button>' +
+                '<div>' +
+                    '<div class="about-tile-label">// the logo</div>' +
                     '<div class="about-text">' + about.about_logo + '</div>' +
                 '</div>' +
             '</div>';
+
+        // Touch devices have no hover, so let a tap flip the logo into a bar chart
+        var stage = container.querySelector('.about-logo-stage');
+        stage.addEventListener('click', function () {
+            var tile = stage.closest('.about-logo-tile');
+            tile.classList.toggle('flipped');
+            stage.setAttribute('aria-pressed', String(tile.classList.contains('flipped')));
+        });
     }
 
     function renderSkills(skills) {
@@ -777,43 +945,56 @@
 
         var html = '';
         projects.forEach(function (p, i) {
-            var cardClasses = 'project-card glow-card' + (p.nda ? ' nda' : '') + ' animate-on-scroll';
-            var clickAttr = (p.link && !p.nda)
-                ? ' onclick="window.open(\'' + escapeHTML(p.link) + '\', \'_blank\')"'
+            var openable = p.link && !p.nda;
+            var cardClasses = 'project-card glow-card animate-on-scroll' +
+                (i === 0 ? ' project-card-featured' : '') +
+                (p.nda ? ' nda' : '');
+            var openAttrs = openable
+                ? ' data-href="' + escapeHTML(p.link) + '" role="link" tabindex="0"'
                 : '';
 
-            var tagsHtml = '';
-            p.tags.forEach(function (tag) {
-                var hue = tagHue(tag);
-                tagsHtml +=
-                    '<span class="project-tag" style="background: hsla(' + hue + ', 70%, 50%, var(--tag-bg-alpha)); color: hsla(' + hue + ', 70%, 70%, var(--tag-text-alpha));">' +
-                        escapeHTML(tag) +
-                    '</span>';
-            });
-
-            var bottomHtml = p.nda
-                ? '<span class="nda-badge">NDA</span>'
-                : (p.link
-                    ? '<a class="project-link" href="' + escapeHTML(p.link) + '" target="_blank" rel="noopener">View Project &rarr;</a>'
-                    : '');
+            var tagsHtml = p.tags.map(function (tag) {
+                return '<span class="project-tag">' + escapeHTML(tag) + '</span>';
+            }).join('');
 
             html +=
-                '<div class="' + cardClasses + '" style="animation-delay: ' + (i * 0.1) + 's"' + clickAttr + '>' +
+                '<div class="' + cardClasses + '" style="animation-delay: ' + (i * 0.08) + 's"' + openAttrs + '>' +
+                    '<div class="project-card-top">' +
+                        '<span class="project-index">' + String(i + 1).padStart(2, '0') + '</span>' +
+                        (p.nda ? '<span class="nda-stamp">NDA &middot; Client work</span>' : '') +
+                    '</div>' +
                     '<h3 class="project-title">' + escapeHTML(p.title) + '</h3>' +
-                    '<div class="project-tags">' + tagsHtml + '</div>' +
                     '<p class="project-description">' + escapeHTML(p.description) + '</p>' +
-                    bottomHtml +
+                    '<div class="project-tags">' + tagsHtml + '</div>' +
+                    (openable
+                        ? '<a class="project-link" href="' + escapeHTML(p.link) + '" target="_blank" rel="noopener">View project ' + UI_ICONS.arrowUpRight + '</a>'
+                        : '') +
                 '</div>';
         });
-        // "More on GitHub" card
+
+        // Featured card takes two cells of the 3-column grid; GitHub card fills the last row
+        var usedCells = projects.length + (projects.length ? 1 : 0);
+        var githubSpan = 3 - (usedCells % 3);
         html +=
-            '<a class="project-card project-card-github animate-on-scroll" href="https://github.com/rayleighxu7" target="_blank" rel="noopener" style="animation-delay: ' + (projects.length * 0.1) + 's">' +
-                '<div class="github-card-inner">' +
-                    '<svg class="github-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>' +
-                    '<span class="github-card-text">More on GitHub</span>' +
-                '</div>' +
+            '<a class="project-card project-card-github project-span-' + githubSpan + ' animate-on-scroll" href="https://github.com/rayleighxu7" target="_blank" rel="noopener" style="animation-delay: ' + (projects.length * 0.08) + 's">' +
+                '<span class="github-card-text">More on GitHub</span>' +
+                '<span class="github-card-handle">github.com/rayleighxu7 ' + UI_ICONS.arrowUpRight + '</span>' +
             '</a>';
         container.innerHTML = html;
+
+        function openCard(card) {
+            window.open(card.dataset.href, '_blank', 'noopener');
+        }
+        container.addEventListener('click', function (e) {
+            if (e.target.closest('a')) return;
+            var card = e.target.closest('.project-card[data-href]');
+            if (card) openCard(card);
+        });
+        container.addEventListener('keydown', function (e) {
+            if (e.key !== 'Enter' || e.target.closest('a')) return;
+            var card = e.target.closest('.project-card[data-href]');
+            if (card) openCard(card);
+        });
     }
 
     function renderExperience(experience) {
@@ -837,32 +1018,59 @@
         var container = document.getElementById('contact-content');
         if (!container) return;
 
-        var currentTheme = getTheme();
-        var ghImgSrc = currentTheme === DARK
-            ? '/static/images/github-logo-dark.png'
-            : '/static/images/github-logo-light.png';
+        var email = escapeHTML(contact.email);
+        var socials = [
+            { track: 'github', label: 'GitHub', href: 'https://' + contact.github, icon: UI_ICONS.github, external: true },
+            { track: 'linkedin', label: 'LinkedIn', href: 'https://' + contact.linkedin, icon: UI_ICONS.linkedin, external: true },
+            { track: 'download-cv', label: 'Download CV', href: '/api/download-cv', icon: UI_ICONS.cv, external: false }
+        ];
 
         container.innerHTML =
-            '<a class="contact-card glow-card animate-on-scroll" href="mailto:' + escapeHTML(contact.email) + '" style="animation-delay: 0s">' +
-                '<div class="contact-icon">\u2709</div>' +
-                '<div class="contact-label">Email</div>' +
-                '<div class="contact-value">' + escapeHTML(contact.email) + '</div>' +
-            '</a>' +
-            '<a class="contact-card glow-card animate-on-scroll" href="https://' + escapeHTML(contact.github) + '" target="_blank" style="animation-delay: 0.1s">' +
-                '<div class="contact-icon"><img src="' + ghImgSrc + '" alt="GitHub" id="github-icon"></div>' +
-                '<div class="contact-label">GitHub</div>' +
-                '<div class="contact-value">' + escapeHTML(contact.github) + '</div>' +
-            '</a>' +
-            '<a class="contact-card glow-card animate-on-scroll" href="https://' + escapeHTML(contact.linkedin) + '" target="_blank" style="animation-delay: 0.2s">' +
-                '<div class="contact-icon"><img src="/static/images/linkedin-logo.png" alt="LinkedIn"></div>' +
-                '<div class="contact-label">LinkedIn</div>' +
-                '<div class="contact-value">' + escapeHTML(contact.linkedin) + '</div>' +
-            '</a>' +
-            '<a id="download-cv-link" class="contact-card glow-card animate-on-scroll" href="/api/download-cv" download style="animation-delay: 0.3s">' +
-                '<div class="contact-icon">\uD83D\uDCC4</div>' +
-                '<div class="contact-label">Download CV</div>' +
-                '<div class="contact-value">One-page PDF</div>' +
-            '</a>';
+            '<a class="btn btn-accent contact-action" data-track="email" href="mailto:' + email + '">' + UI_ICONS.mail + 'Email me</a>' +
+            '<button type="button" class="copy-pill contact-action" data-track="copy-email" data-email="' + email + '" aria-label="Copy email address ' + email + '">' +
+                '<span>' + email + '</span>' +
+                '<span class="copy-pill-icon">' + UI_ICONS.copy + '</span>' +
+            '</button>' +
+            '<div class="contact-socials">' +
+                socials.map(function (s) {
+                    return '<a class="contact-social contact-action" data-track="' + s.track + '" data-label="' + s.label + '" aria-label="' + s.label + '" href="' + escapeHTML(s.href) + '"' +
+                        (s.external ? ' target="_blank" rel="noopener"' : ' download') + '>' + s.icon + '</a>';
+                }).join('') +
+            '</div>';
+
+        container.querySelector('.copy-pill').addEventListener('click', function () {
+            var value = this.dataset.email;
+            if (!navigator.clipboard) {
+                showToast(value);
+                return;
+            }
+            navigator.clipboard.writeText(value).then(function () {
+                showToast('Email copied to clipboard');
+            }, function () {
+                showToast(value);
+            });
+        });
+    }
+
+    var toastTimer = null;
+
+    function showToast(message) {
+        var toast = document.getElementById('toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'toast';
+            toast.className = 'toast';
+            toast.setAttribute('role', 'status');
+            document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        // Force a reflow so the entrance transition runs on first use
+        void toast.offsetWidth;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+            toast.classList.remove('show');
+        }, 1800);
     }
 
     /* ----------------------------------------------------------------------
@@ -923,21 +1131,10 @@
         }
     }
 
-    function setupTitleAnimations() {
-        var titles = document.querySelectorAll('.section-title');
-        if (!titles.length) return;
-
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('title-visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.5 });
-
-        titles.forEach(function (title) {
-            observer.observe(title);
+    // Number section eyebrows in page order, so disabled sections leave no gaps
+    function setupSectionNumbers() {
+        document.querySelectorAll('.section-num').forEach(function (el, i) {
+            el.textContent = String(i + 1).padStart(2, '0') + ' / ';
         });
     }
 
@@ -1073,6 +1270,7 @@
         // Theme and navbar can run immediately
         setupThemeToggle();
         setupNavbar();
+        setupBackgroundBeams();
 
         try {
             var results = await dataPromise;
@@ -1087,7 +1285,7 @@
             var contact    = results[7];
 
             if (sectionFlags.hero) {
-                renderHero(profile);
+                renderHero(profile, sectionFlags);
                 setupHeroParallax();
             }
             if (sectionFlags.metrics && metrics) {
@@ -1100,7 +1298,7 @@
                 renderProjects(projects);
             }
             if (sectionFlags.about && about) {
-                renderAbout(about);
+                renderAbout(about, profile);
             }
             if (sectionFlags.experience && experience) {
                 renderExperience(experience);
@@ -1112,8 +1310,8 @@
                 renderContact(contact);
             }
 
+            setupSectionNumbers();
             setupScrollAnimations();
-            setupTitleAnimations();
             setupCardGlow();
             setupTimelineAnimations();
             setupMagneticButtons();

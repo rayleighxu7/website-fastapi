@@ -12,11 +12,13 @@
     <link rel="icon" href="/static/images/black-logo-yellow-bg.PNG" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css?v={{ v }}">
 </head>
 <body>
     <script id="sections-config" type="application/json">{{ sections_config | tojson }}</script>
+
+    <canvas id="bg-beams" class="bg-beams" aria-hidden="true"></canvas>
 
     <!-- Scroll Progress -->
     <div id="scroll-progress" class="scroll-progress"></div>

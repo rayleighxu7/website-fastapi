@@ -1,3 +1,15 @@
+{% macro section_head(label, title=None, muted=None) %}
+            <div class="section-head reveal">
+                <div class="section-eyebrow">
+                    <span class="etl-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+                    <span class="section-num"></span>{{ label }}
+                </div>
+                {% if title %}
+                <h2 class="section-title">{{ title }}{% if muted %} <span class="section-title-muted">{{ muted }}</span>{% endif %}</h2>
+                {% endif %}
+            </div>
+{% endmacro %}
+
 {% macro render_section(key) %}
 {% if key == 'hero' %}
     <section id="hero" class="section hero-section">
@@ -17,29 +29,28 @@
 {% elif key == 'services' %}
     <section id="services" class="section animate-on-scroll">
         <div class="section-content">
-            <h2 class="section-title">Services</h2>
-            <p class="section-subtitle">What I can do for you</p>
+            {{ section_head('Services', 'What I can do', 'for you.') }}
             <div id="services-content" class="services-grid"></div>
         </div>
     </section>
 {% elif key == 'projects' %}
     <section id="projects" class="section animate-on-scroll">
         <div class="section-content">
-            <h2 class="section-title">Projects</h2>
-            <p class="section-subtitle">A selection of things I have worked on</p>
+            {{ section_head('Projects', 'A selection of things', 'I have worked on.') }}
             <div id="projects-content" class="projects-grid"></div>
         </div>
     </section>
 {% elif key == 'about' %}
     <section id="about" class="section animate-on-scroll">
         <div class="section-content">
+            {{ section_head('About') }}
             <div id="about-content" class="about-grid"></div>
         </div>
     </section>
 {% elif key == 'experience' %}
     <section id="experience" class="section animate-on-scroll">
         <div class="section-content">
-            <h2 class="section-title">Experience</h2>
+            {{ section_head('Experience') }}
             <div id="experience-content" class="timeline"></div>
         </div>
     </section>
@@ -53,9 +64,17 @@
 {% elif key == 'contact' %}
     <section id="contact" class="section animate-on-scroll">
         <div class="section-content">
-            <h2 class="section-title">Get In Touch</h2>
-            <p class="section-subtitle">I'd love to hear from you</p>
-            <div id="contact-content" class="contact-grid"></div>
+            <div class="contact-cta">
+                <div class="section-head section-head-center reveal">
+                    <div class="section-eyebrow">
+                        <span class="etl-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+                        <span class="section-num"></span>Get in touch
+                    </div>
+                    <h2 class="contact-title">Let's build something <span class="gold-text">great together.</span></h2>
+                    <p class="contact-subtitle">I'd love to hear from you</p>
+                </div>
+                <div id="contact-content" class="contact-actions"></div>
+            </div>
         </div>
     </section>
 {% endif %}
